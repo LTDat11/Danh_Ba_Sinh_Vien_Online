@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "617898896860",
+    "project_id": "tuhoc-86488",
+    "storage_bucket": "tuhoc-86488.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:617898896860:android:3f335a999cdd499ac2f319",
+        "android_client_info": {
+          "package_name": "com.example.myapplication"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDxIYa8RTygZ9aM-AQ7NrunE3eIu2TJUEc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
