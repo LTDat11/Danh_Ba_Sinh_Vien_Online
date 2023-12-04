@@ -1,9 +1,11 @@
-package com.example.myapplication.activities
+package com.example.myapplication.Fragments
 
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.provider.MediaStore
 import android.util.Patterns
 import android.view.LayoutInflater
@@ -28,6 +30,7 @@ class RegisterFragment : Fragment() {
     private lateinit var auth: FirebaseAuth
     private val PICK_IMAGE_REQUEST_CODE = 123
     private var data: Intent? = null
+    private var isImageSelected = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -55,16 +58,21 @@ class RegisterFragment : Fragment() {
                 val confirmPasswordInput: String = passwordInputConfirm.text.toString().trim()
 
                 if (validate(emailInput, passwordInput, confirmPasswordInput)) {
-                    progressBar.visibility = View.VISIBLE
-                    CoroutineScope(Dispatchers.IO).launch {
-                        withContext(Dispatchers.Main) {
-                            val selectedImageUri: Uri? = data?.data
-                            selectedImageUri?.let {
-                                binding.img.setImageURI(it)
-                                registerWithEmailAndPassword(emailInput, passwordInput, it)
+                    if (isImageSelected){
+                        progressBar.visibility = View.VISIBLE
+                        CoroutineScope(Dispatchers.IO).launch {
+                            withContext(Dispatchers.Main) {
+                                val selectedImageUri: Uri? = data?.data
+                                selectedImageUri?.let {
+                                    binding.img.setImageURI(it)
+                                    registerWithEmailAndPassword(emailInput, passwordInput, it)
+                                }
                             }
                         }
+                    }else{
+                        showMessage("Vui lòng chọn ảnh đại diện(Bấm vào ảnh bên trên để chọn)")
                     }
+
                 }
             }
 
@@ -92,6 +100,7 @@ class RegisterFragment : Fragment() {
             val selectedImageUri: Uri? = data.data
             selectedImageUri?.let {
                 binding.img.setImageURI(it)
+                isImageSelected = true //đã chọn ảnh
             }
         }
     }
@@ -140,14 +149,15 @@ class RegisterFragment : Fragment() {
     private fun showMessage(s: String) {
         binding.tvMessage.text = s
         binding.tvMessage.visibility = View.VISIBLE
+        Handler(Looper.getMainLooper()).postDelayed({
+            binding.tvMessage.visibility = View.GONE
+        }, 5000)
     }
 
     private fun registerWithEmailAndPassword(email: String, password: String, selectedImageUri: Uri) {
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener(requireActivity()) { task ->
                 if (task.isSuccessful) {
-
-
                     // Lấy thông tin người dùng sau khi đăng ký thành công
                     val user = auth.currentUser
                     user?.let {

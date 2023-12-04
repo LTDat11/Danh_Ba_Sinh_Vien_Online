@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/navigation_home"
+        android:title="Trang chủ"
+        android:icon="@drawable/baseline_home_24" />
+
+    <item
+        android:id="@+id/navigation_add"
+        android:title="Thêm"
+        android:icon="@drawable/baseline_add_circle_24" />
+
+    <item
+        android:id="@+id/navigation_setting"
+        android:title="Cài đặt"
+        android:icon="@drawable/baseline_settings_24" />
+
+
+</menu>

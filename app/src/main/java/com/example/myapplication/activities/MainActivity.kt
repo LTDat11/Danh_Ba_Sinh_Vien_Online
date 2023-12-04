@@ -2,6 +2,7 @@ package com.example.myapplication.activities
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import com.example.myapplication.Fragments.LoginFragment
 import com.example.myapplication.R
 import com.example.myapplication.databinding.ActivityMainBinding
 
@@ -13,7 +14,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         supportFragmentManager.beginTransaction()
-            .replace(R.id.frame_layout,LoginFragment())
+            .replace(R.id.frame_layout, LoginFragment())
             .commit()
     }
 }

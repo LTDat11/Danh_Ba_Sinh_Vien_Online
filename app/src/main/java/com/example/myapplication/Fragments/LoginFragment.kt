@@ -1,4 +1,4 @@
-package com.example.myapplication.activities
+package com.example.myapplication.Fragments
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -20,13 +20,13 @@ class LoginFragment : Fragment() {
 
             tvRegister.setOnClickListener{
                 requireActivity().supportFragmentManager.beginTransaction()
-                    .replace(R.id.frame_layout,RegisterFragment())
+                    .replace(R.id.frame_layout, RegisterFragment())
                     .commit()
             }
 
             tvForgotPass.setOnClickListener {
                 requireActivity().supportFragmentManager.beginTransaction()
-                    .replace(R.id.frame_layout,ForgotPassFragment())
+                    .replace(R.id.frame_layout, ForgotPassFragment())
                     .commit()
             }
             //Click login
