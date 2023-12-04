@@ -2,8 +2,6 @@ package com.example.myapplication.activities
 
 import android.app.Activity
 import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
@@ -11,7 +9,7 @@ import android.util.Patterns
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
+import androidx.activity.addCallback
 import androidx.fragment.app.Fragment
 import com.example.myapplication.R
 import com.example.myapplication.databinding.FragmentRegisterBinding
@@ -23,14 +21,13 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.ByteArrayOutputStream
 import java.util.UUID
 
 class RegisterFragment : Fragment() {
     lateinit var binding: FragmentRegisterBinding
     private lateinit var auth: FirebaseAuth
-    private val firestore = FirebaseFirestore.getInstance()
     private val PICK_IMAGE_REQUEST_CODE = 123
+    private var data: Intent? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -61,10 +58,22 @@ class RegisterFragment : Fragment() {
                     progressBar.visibility = View.VISIBLE
                     CoroutineScope(Dispatchers.IO).launch {
                         withContext(Dispatchers.Main) {
-                            registerWithEmailAndPassword(emailInput, passwordInput)
+                            val selectedImageUri: Uri? = data?.data
+                            selectedImageUri?.let {
+                                binding.img.setImageURI(it)
+                                registerWithEmailAndPassword(emailInput, passwordInput, it)
+                            }
                         }
                     }
                 }
+            }
+
+            // Xử lý sự kiện khi nút "quay lại" trên điện thoại được nhấn
+            requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
+                // Chuyển về LoginFragment khi nút "quay lại" được nhấn
+                requireActivity().supportFragmentManager.beginTransaction()
+                    .replace(R.id.frame_layout, LoginFragment())
+                    .commit()
             }
         }
         // Inflate the layout for this fragment
@@ -79,21 +88,15 @@ class RegisterFragment : Fragment() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == PICK_IMAGE_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null) {
+            this.data = data // Lưu trữ data vào biến data của RegisterFragment
             val selectedImageUri: Uri? = data.data
             selectedImageUri?.let {
                 binding.img.setImageURI(it)
-                CoroutineScope(Dispatchers.IO).launch {
-                    withContext(Dispatchers.Main) {
-                        // Lưu ảnh vào Firestore và cập nhật thông tin người dùng
-                        saveImageAndUserInfoToFirestore(it, binding.emailInput.text.toString().trim())
-                    }
-                }
             }
         }
     }
 
     private suspend fun saveImageAndUserInfoToFirestore(imageUri: Uri, email: String) {
-        // Lưu ảnh vào Firebase Storage
         val imageStorageRef = FirebaseStorage.getInstance().reference.child("profile_images")
         val imageFileName = UUID.randomUUID().toString() // Tên file ảnh duy nhất
         val imageRef = imageStorageRef.child("$imageFileName.jpg")
@@ -110,15 +113,15 @@ class RegisterFragment : Fragment() {
                         val userDocRef = FirebaseFirestore.getInstance().collection("users")
                             .document(userUid)
 
-                        // Create a data map to store multiple fields
-                        val userData = hashMapOf(
-                            "email" to binding.emailInput.text.toString(),
+                        // Tạo một đối tượng User để lưu vào Firestore
+                        val user = hashMapOf(
+                            "email" to email,
                             "profileImageUrl" to imageUrl.toString(),
                             "name" to binding.edtName.text.toString()
                         )
 
-                        // Update specific fields without overwriting existing data
-                        userDocRef.set(userData, SetOptions.merge())
+                        // Lưu thông tin người dùng vào Firestore
+                        userDocRef.set(user, SetOptions.merge())
                             .addOnSuccessListener {
                                 // Thành công
                                 showMessage("Đăng ký thành công!")
@@ -134,26 +137,40 @@ class RegisterFragment : Fragment() {
         }
     }
 
-
     private fun showMessage(s: String) {
         binding.tvMessage.text = s
         binding.tvMessage.visibility = View.VISIBLE
     }
 
-    private fun registerWithEmailAndPassword(email: String, password: String) {
+    private fun registerWithEmailAndPassword(email: String, password: String, selectedImageUri: Uri) {
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener(requireActivity()) { task ->
                 if (task.isSuccessful) {
-                    binding.progressBar.visibility = View.GONE
+
+
+                    // Lấy thông tin người dùng sau khi đăng ký thành công
+                    val user = auth.currentUser
+                    user?.let {
+                        // Lưu ảnh và thông tin người dùng vào Firestore
+                        CoroutineScope(Dispatchers.IO).launch {
+                            withContext(Dispatchers.Main) {
+                                binding.progressBar.visibility = View.GONE
+                                saveImageAndUserInfoToFirestore(selectedImageUri, email)
+                            }
+                        }
+                    }
                 } else {
                     CoroutineScope(Dispatchers.IO).launch {
                         withContext(Dispatchers.Main) {
+                            binding.progressBar.visibility = View.GONE
                             showMessage("Đăng ký thất bại: ${task.exception?.message}")
                         }
                     }
                 }
             }
     }
+
+
 
     private fun validate(email: String, password: String, confirmPassword: String): Boolean {
         if (email.isEmpty() || !Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
@@ -174,3 +191,5 @@ class RegisterFragment : Fragment() {
         return true
     }
 }
+
+

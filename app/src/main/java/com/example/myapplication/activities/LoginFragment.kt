@@ -25,7 +25,9 @@ class LoginFragment : Fragment() {
             }
 
             tvForgotPass.setOnClickListener {
-
+                requireActivity().supportFragmentManager.beginTransaction()
+                    .replace(R.id.frame_layout,ForgotPassFragment())
+                    .commit()
             }
             //Click login
             btnLogin.setOnClickListener {
