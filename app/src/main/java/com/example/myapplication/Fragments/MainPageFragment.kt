@@ -1,5 +1,7 @@
 package com.example.myapplication.Fragments
 
+import android.content.Context
+import android.content.SharedPreferences
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -16,15 +18,17 @@ class MainPageFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         binding = FragmentMainPageBinding.inflate(layoutInflater,container,false)
+
         // Mặc định, hiển thị Fragment Home khi MainPageFragment được tạo
         replaceFragment(HomeFragment())
+
         // Xử lý sự kiện khi chọn một mục trên Bottom Navigation
         binding.apply {
             bottomNavigationView.setOnNavigationItemSelectedListener { item ->
                 when (item.itemId) {
                     R.id.navigation_home -> replaceFragment(HomeFragment())
-                    R.id.navigation_add -> replaceFragment(HomeFragment())
-                    R.id.navigation_setting -> replaceFragment(HomeFragment())
+                    R.id.navigation_add -> replaceFragment(AddFragment())
+                    R.id.navigation_setting -> replaceFragment(SettingFragment())
                 }
                 true
             }

@@ -166,6 +166,10 @@ class RegisterFragment : Fragment() {
                             withContext(Dispatchers.Main) {
                                 binding.progressBar.visibility = View.GONE
                                 saveImageAndUserInfoToFirestore(selectedImageUri, email)
+                                // Đăng nhập thành công,Chuyển tới trang MainPage
+                                requireActivity().supportFragmentManager.beginTransaction()
+                                    .replace(R.id.frame_layout,MainPageFragment())
+                                    .commit()
                             }
                         }
                     }
