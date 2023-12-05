@@ -70,7 +70,9 @@ class RegisterFragment : Fragment() {
                             }
                         }
                     }else{
-                        showMessage("Vui lòng chọn ảnh đại diện(Bấm vào ảnh bên trên để chọn)")
+                        progressBar.visibility = View.VISIBLE
+//                        showMessage("Vui lòng chọn ảnh đại diện(Bấm vào ảnh bên trên để chọn)")
+                        registerWithEmailAndPassword2(emailInput, passwordInput)
                     }
 
                 }
@@ -86,6 +88,65 @@ class RegisterFragment : Fragment() {
         }
         // Inflate the layout for this fragment
         return binding.root
+    }
+
+    private fun registerWithEmailAndPassword2(emailInput: String, passwordInput: String) {
+        auth.createUserWithEmailAndPassword(emailInput, passwordInput)
+            .addOnCompleteListener(requireActivity()) { task ->
+                if (task.isSuccessful) {
+                    // Lấy thông tin người dùng sau khi đăng ký thành công
+                    val user = auth.currentUser
+                    user?.let {
+                        // Lưu ảnh và thông tin người dùng vào Firestore
+                        CoroutineScope(Dispatchers.IO).launch {
+                            withContext(Dispatchers.Main) {
+                                binding.progressBar.visibility = View.GONE
+                                saveImageAndUserInfoToFirestore2(emailInput)
+                                // Đăng nhập thành công,Chuyển tới trang MainPage
+                                requireActivity().supportFragmentManager.beginTransaction()
+                                    .replace(R.id.frame_layout,MainPageFragment())
+                                    .commit()
+                            }
+                        }
+                    }
+                } else {
+                    CoroutineScope(Dispatchers.IO).launch {
+                        withContext(Dispatchers.Main) {
+                            binding.progressBar.visibility = View.GONE
+                            showMessage("Đăng ký thất bại: ${task.exception?.message}")
+                        }
+                    }
+                }
+            }
+
+    }
+
+    private fun saveImageAndUserInfoToFirestore2(emailInput: String) {
+        val imageStorageRef = FirebaseStorage.getInstance().reference.child("profile_images")
+        val imageRef = imageStorageRef.child("avtdf.jpg")
+        // Lấy URL của ảnh từ Firebase Storage
+        imageRef.downloadUrl.addOnSuccessListener { imageUrl ->
+            // Lưu thông tin người dùng vào Firestore
+            val userUid = FirebaseAuth.getInstance().currentUser?.uid
+            userUid?.let {
+                val userDocRef = FirebaseFirestore.getInstance().collection("users")
+                    .document(userUid)
+                // Tạo một đối tượng User để lưu vào Firestore
+                val user = hashMapOf(
+                    "email" to emailInput,
+                    "profileImageUrl" to imageUrl.toString(),
+                    "name" to binding.edtName.text.toString()
+                )
+                // Lưu thông tin người dùng vào Firestore
+                userDocRef.set(user, SetOptions.merge())
+                    .addOnSuccessListener {
+                        // Thành công
+                        showMessage("Đăng ký thành công!")
+                    }.addOnFailureListener { e ->
+                        showMessage("Lỗi khi cập nhật thông tin người dùng: $e")
+                    }
+            }
+        }
     }
 
     private fun openImageChooser() {
@@ -183,7 +244,6 @@ class RegisterFragment : Fragment() {
                 }
             }
     }
-
 
 
     private fun validate(email: String, password: String, confirmPassword: String): Boolean {

@@ -25,7 +25,7 @@ class LoginFragment : Fragment() {
 
         binding.apply {
 
-            // Kiểm tra trạng thái đăng nhập
+            // Share referece
             val currentUser = auth.currentUser
             if(currentUser != null){
                 requireActivity().supportFragmentManager.beginTransaction()

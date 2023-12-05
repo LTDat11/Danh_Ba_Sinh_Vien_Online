@@ -1,17 +1,101 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".Fragments.SettingFragment">
 
-    <TextView
-        android:id="@+id/textViewHome"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Setting Fragment"
-        android:layout_centerInParent="true"
-        android:textSize="18sp" />
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <androidx.cardview.widget.CardView
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="20dp"
+            app:cardCornerRadius="30dp"
+            app:cardElevation="20dp">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="20dp">
+
+                <de.hdodenhof.circleimageview.CircleImageView
+                    android:id="@+id/img"
+                    android:layout_width="wrap_content"
+                    android:layout_height="100dp"
+                    android:layout_marginTop="10dp"
+                    android:src="@drawable/avtdefault"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"/>
+
+                <TextView
+                    android:id="@+id/tv_Name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Tên người dùng"
+                    android:textAlignment="center"
+                    android:textSize="30sp"
+                    android:textStyle="bold"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/img" />
+
+                <TextView
+                    android:id="@+id/tv_Email"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Địa chỉ email"
+                    android:textAlignment="center"
+                    android:textSize="25sp"
+                    android:textStyle="italic"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/tv_Name"/>
+
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/tv_Email">
+
+                    <Button
+                        android:id="@+id/btn_change"
+                        android:layout_marginStart="25dp"
+                        android:layout_marginTop="25dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="60dp"
+                        android:text="Chỉnh sửa"
+                        android:backgroundTint="@color/black"
+                        android:textSize="18dp"/>
+
+                    <Button
+                        android:id="@+id/btn_logout"
+                        android:layout_marginStart="25dp"
+                        android:layout_marginTop="25dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="60dp"
+                        android:text="Đăng xuất"
+                        android:backgroundTint="@color/black"
+                        android:textSize="18dp"/>
+
+                </LinearLayout>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+        </androidx.cardview.widget.CardView>
+
+    </ScrollView>
+
+
 
 </RelativeLayout>
