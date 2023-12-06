@@ -30,6 +30,7 @@
 
         </com.google.android.material.card.MaterialCardView>
         <LinearLayout
+            android:id="@+id/linearlayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_constraintTop_toBottomOf="@id/materialCardView"
@@ -47,9 +48,37 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:textAlignment="center" />
-
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="Tổng số thông tin: "
+                android:gravity="center"
+                android:textSize="18dp"
+                android:textStyle="bold"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="0"
+                android:gravity="center"
+                android:textSize="18dp" />
         </LinearLayout>
+        <androidx.recyclerview.widget.RecyclerView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/linearlayout"/>
+
+        <TextView
+            android:visibility="gone"
+            android:id="@+id/tv_noItem"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="Không có nội dung"
+            android:textSize="30dp"
+            android:gravity="center" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
 
 </RelativeLayout>

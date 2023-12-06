@@ -18,6 +18,11 @@ class HomeFragment : Fragment() {
 
         binding.apply {
 
+            materialCardView.setOnClickListener {
+                searchview.isIconified = false
+            }
+
+
         }
 
         // Inflate the layout for this fragment
