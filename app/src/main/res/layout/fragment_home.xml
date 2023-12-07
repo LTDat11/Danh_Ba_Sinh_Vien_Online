@@ -44,7 +44,7 @@
                 android:layout_height="match_parent"
                 android:drawableStart="@drawable/baseline_filter_alt_24"/>
             <Spinner
-                android:id="@+id/spinner"
+                android:id="@+id/spinner_fillter"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:textAlignment="center" />
@@ -57,12 +57,13 @@
                 android:textStyle="bold"/>
             <TextView
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
+                android:layout_height="47dp"
                 android:text="0"
                 android:gravity="center"
                 android:textSize="18dp" />
         </LinearLayout>
         <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycleview"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_constraintStart_toStartOf="parent"

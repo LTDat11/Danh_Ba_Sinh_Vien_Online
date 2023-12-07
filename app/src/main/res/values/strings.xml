@@ -2,4 +2,12 @@
     <string name="app_name">My Application</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    
+    <!--spinner    -->
+    <string-array name="fillter">
+        <item>Tên (A-Z)</item>
+        <item>Tên (Z-A)</item>
+        <item>Khóa (Tăng dần)</item>
+        <item>Khóa (Giảm dần)</item>
+    </string-array>
 </resources>
