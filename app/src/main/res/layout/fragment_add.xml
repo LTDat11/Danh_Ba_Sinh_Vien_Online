@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -35,7 +36,30 @@
                 app:layout_constraintStart_toEndOf="@+id/img_selected"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                android:layout_marginTop="50dp" />
+                android:layout_marginTop="25dp" />
+            <Button
+                android:id="@+id/btn_delete_img"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Xóa ảnh"
+                android:backgroundTint="@color/black"
+                android:textSize="20dp"
+                app:layout_constraintStart_toEndOf="@+id/img_selected"
+                app:layout_constraintTop_toBottomOf="@id/btn_select_img"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginTop="15dp" />
+
+            <ImageButton
+                android:id="@+id/btn_reset_form"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/baseline_refresh_24"
+                app:layout_constraintTop_toBottomOf="@+id/btn_delete_img"
+                app:layout_constraintBottom_toTopOf="@id/edt_name_input"
+                app:layout_constraintStart_toEndOf="@id/btn_delete_img"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:background="@color/white"
+                android:layout_marginBottom="20dp"/>
 
             <TextView
                 android:id="@+id/tv_Name"
@@ -269,6 +293,16 @@
                 android:layout_marginEnd="25dp"
                 android:layout_marginTop="10dp"
                 android:layout_marginBottom="15dp"/>
+
+            <ProgressBar
+                android:id="@+id/progress_bar"
+                android:visibility="gone"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent" />
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>

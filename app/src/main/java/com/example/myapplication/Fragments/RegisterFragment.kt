@@ -64,7 +64,7 @@ class RegisterFragment : Fragment() {
                             withContext(Dispatchers.Main) {
                                 val selectedImageUri: Uri? = data?.data
                                 selectedImageUri?.let {
-                                    binding.img.setImageURI(it)
+                                    img.setImageURI(it)
                                     registerWithEmailAndPassword(emailInput, passwordInput, it)
                                 }
                             }
@@ -150,8 +150,12 @@ class RegisterFragment : Fragment() {
     }
 
     private fun openImageChooser() {
-        val galleryIntent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-        startActivityForResult(galleryIntent, PICK_IMAGE_REQUEST_CODE)
+        CoroutineScope(Dispatchers.IO).launch {
+            withContext(Dispatchers.Main){
+                val galleryIntent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+                startActivityForResult(galleryIntent, PICK_IMAGE_REQUEST_CODE)
+            }
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
