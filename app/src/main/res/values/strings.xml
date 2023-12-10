@@ -7,7 +7,7 @@
     <string-array name="fillter">
         <item>Tên (A-Z)</item>
         <item>Tên (Z-A)</item>
-        <item>Khóa (Tăng dần)</item>
-        <item>Khóa (Giảm dần)</item>
+        <item>Mã số (Tăng dần)</item>
+        <item>Mã số (Giảm dần)</item>
     </string-array>
 </resources>

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:cardElevation="8dp"
+    app:cardCornerRadius="8dp"
+    android:layout_margin="10dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/img_student_info"
+            android:layout_width="140dp"
+            android:layout_height="160dp"
+            android:src="@drawable/avtdefault"
+            android:padding="5dp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tv_name_of_student"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Name of student"
+                android:textSize="25dp"
+                android:textStyle="bold"
+                android:maxLines="1" />
+
+            <TextView
+                android:id="@+id/tv_phone_of_student"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:text="Phone of student"
+                android:textSize="25dp"
+                android:maxLines="1"
+                android:drawableStart="@drawable/baseline_contact_phone_24"/>
+
+            <TextView
+                android:id="@+id/tv_email_of_student"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:text="Email of student"
+                android:textSize="25dp"
+                android:textStyle=""
+                android:maxLines="1"
+                android:drawableStart="@drawable/baseline_contact_mail_24"/>
+
+            <TextView
+                android:id="@+id/tv_id_of_student"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:text="ID of student"
+                android:textSize="25dp"
+                android:textStyle=""
+                android:maxLines="1"
+                android:drawableStart="@drawable/baseline_assignment_ind_24"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>

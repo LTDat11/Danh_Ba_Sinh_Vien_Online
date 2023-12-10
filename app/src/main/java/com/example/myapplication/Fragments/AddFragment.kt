@@ -106,14 +106,12 @@ class AddFragment : Fragment() {
                                 selectedImageUri?.let {
                                     imgSelected.setImageURI(it)
                                     saveStudentInfo(name,dateOfBirth,phoneNumber,email,major,studentId,classId,course, it)
-                                    resetForm()
                                 }
                             }
                         }
                     }else{
                         progressBar.visibility = View.VISIBLE
                         saveStudentInfo2(name,dateOfBirth,phoneNumber,email,major,studentId,classId,course)
-                        resetForm()
                     }
                 }
             }
@@ -173,6 +171,7 @@ class AddFragment : Fragment() {
                         .addOnSuccessListener {
                             Toast.makeText(requireContext(), "Lưu thành công", Toast.LENGTH_SHORT).show()
                             binding.progressBar.visibility = View.GONE
+                            resetForm()
                         }.addOnFailureListener { e ->
                             Toast.makeText(requireContext(), "Lỗi: $e", Toast.LENGTH_SHORT).show()
                             binding.progressBar.visibility = View.GONE
@@ -220,6 +219,7 @@ class AddFragment : Fragment() {
                                     .addOnSuccessListener {
                                         Toast.makeText(requireContext(), "Lưu thành công", Toast.LENGTH_SHORT).show()
                                         binding.progressBar.visibility = View.GONE
+                                        resetForm()
                                     }.addOnFailureListener { e ->
                                         Toast.makeText(requireContext(), "Lỗi: $e", Toast.LENGTH_SHORT).show()
                                         binding.progressBar.visibility = View.GONE
