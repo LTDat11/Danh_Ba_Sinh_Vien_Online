@@ -18,6 +18,16 @@ class StudentAdapter(private  val studentList: ArrayList<StudentInfo>): Recycler
         val phoneNumberTextView: TextView = itemView.findViewById(R.id.tv_phone_of_student)
         val studentIdTextView: TextView = itemView.findViewById(R.id.tv_id_of_student)
         val emailTextView: TextView = itemView.findViewById(R.id.tv_email_of_student)
+
+        init {
+            itemView.setOnClickListener {
+                val position = adapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    listener?.onItemClick(studentList[position])
+                }
+            }
+        }
+
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): StudentViewHolder {
@@ -34,10 +44,23 @@ class StudentAdapter(private  val studentList: ArrayList<StudentInfo>): Recycler
         holder.phoneNumberTextView.text = currentItem.phoneNumber
         holder.studentIdTextView.text = currentItem.studentId
         holder.emailTextView.text = currentItem.email
+
+
     }
 
     override fun getItemCount(): Int {
         return studentList.size
     }
+
+    interface OnItemClickListener {
+        fun onItemClick(studentInfo: StudentInfo)
+    }
+
+    private var listener: OnItemClickListener? = null
+
+    fun setOnItemClickListener(listener: OnItemClickListener) {
+        this.listener = listener
+    }
+
 
 }
