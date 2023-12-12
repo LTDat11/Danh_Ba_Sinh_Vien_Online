@@ -171,39 +171,50 @@ class AddFragment : Fragment() {
                     Toast.makeText(requireContext(), "Thông tin sinh viên đã tồn tại. Vui lòng kiểm tra lại.", Toast.LENGTH_SHORT).show()
                     binding.progressBar.visibility = View.GONE
                 }else{
-                    val imageStorageRef = FirebaseStorage.getInstance().reference.child("profile_images")
-                    val imageRef = imageStorageRef.child("avtdf.jpg")
-                    imageRef.downloadUrl.addOnSuccessListener{ imageUrl ->
-                        val userUid = FirebaseAuth.getInstance().currentUser?.uid
-                        // Tạo một đối tượng StudentInfo
+                    if (isStudentIdExist(studentId)){
+                        Toast.makeText(requireContext(), "Mã số sinh viên đã tồn tại. Vui lòng kiểm tra lại.", Toast.LENGTH_SHORT).show()
+                        binding.progressBar.visibility = View.GONE
+                    }else if (isStudentEmailExist(email)){
+                        Toast.makeText(requireContext(), "Email đã tồn tại. Vui lòng kiểm tra lại.", Toast.LENGTH_SHORT).show()
+                        binding.progressBar.visibility = View.GONE
+                    }else if (isStudentPhoneNumberlExist(phoneNumber)){
+                        Toast.makeText(requireContext(), "Số điện thoại đã tồn tại. Vui lòng kiểm tra lại.", Toast.LENGTH_SHORT).show()
+                        binding.progressBar.visibility = View.GONE
+                    }else{
+                        val imageStorageRef = FirebaseStorage.getInstance().reference.child("profile_images")
+                        val imageRef = imageStorageRef.child("avtdf.jpg")
+                        imageRef.downloadUrl.addOnSuccessListener{ imageUrl ->
+                            val userUid = FirebaseAuth.getInstance().currentUser?.uid
+                            // Tạo một đối tượng StudentInfo
 
-                        val studentInfo = StudentInfo(
-                            name = name,
-                            dateOfBirth = dateOfBirth,
-                            phoneNumber = phoneNumber,
-                            email = email,
-                            major = major,
-                            studentId = studentId,
-                            classId = classId,
-                            course = course,
-                            imageUrl = imageUrl.toString()
-                        )
+                            val studentInfo = StudentInfo(
+                                name = name,
+                                dateOfBirth = dateOfBirth,
+                                phoneNumber = phoneNumber,
+                                email = email,
+                                major = major,
+                                studentId = studentId,
+                                classId = classId,
+                                course = course,
+                                imageUrl = imageUrl.toString()
+                            )
 
-                        userUid?.let{
-                            val firestore = FirebaseFirestore.getInstance()
-                            val studentCollectionRef = firestore.collection("users").document(userUid).collection("students")
-                            studentCollectionRef.add(studentInfo)
-                                .addOnSuccessListener {
-                                    Toast.makeText(requireContext(), "Lưu thành công", Toast.LENGTH_SHORT).show()
-                                    binding.progressBar.visibility = View.GONE
-                                    resetForm()
-                                }.addOnFailureListener { e ->
-                                    Toast.makeText(requireContext(), "Lỗi: $e", Toast.LENGTH_SHORT).show()
-                                    binding.progressBar.visibility = View.GONE
-                                }
+                            userUid?.let{
+                                val firestore = FirebaseFirestore.getInstance()
+                                val studentCollectionRef = firestore.collection("users").document(userUid).collection("students")
+                                studentCollectionRef.add(studentInfo)
+                                    .addOnSuccessListener {
+                                        Toast.makeText(requireContext(), "Lưu thành công", Toast.LENGTH_SHORT).show()
+                                        binding.progressBar.visibility = View.GONE
+                                        resetForm()
+                                    }.addOnFailureListener { e ->
+                                        Toast.makeText(requireContext(), "Lỗi: $e", Toast.LENGTH_SHORT).show()
+                                        binding.progressBar.visibility = View.GONE
+                                    }
+
+                            }
 
                         }
-
                     }
                 }
 
@@ -215,28 +226,18 @@ class AddFragment : Fragment() {
         val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid
         if (currentUserUid != null) {
             val firestore = FirebaseFirestore.getInstance()
+
+            // Kiểm tra xem có bất kỳ sinh viên nào có cùng mã số sinh viên, email và số điện thoại hay không
             val querySnapshot = firestore.collection("users")
                 .document(currentUserUid)
                 .collection("students")
                 .whereEqualTo("studentId", studentId)
+                .whereEqualTo("email", email)
+                .whereEqualTo("phoneNumber", phoneNumber)
                 .get()
                 .await()
 
-            if (!querySnapshot.isEmpty) {
-                // Mã sinh viên đã tồn tại
-                return true
-            } else {
-                // Kiểm tra email và số điện thoại
-                val emailPhoneQuerySnapshot = firestore.collection("users")
-                    .document(currentUserUid)
-                    .collection("students")
-                    .whereEqualTo("email", email)
-                    .whereEqualTo("phoneNumber", phoneNumber)
-                    .get()
-                    .await()
-
-                return !emailPhoneQuerySnapshot.isEmpty
-            }
+            return !querySnapshot.isEmpty
         }
         return false
     }
@@ -251,49 +252,114 @@ class AddFragment : Fragment() {
                     Toast.makeText(requireContext(), "Thông tin sinh viên đã tồn tại. Vui lòng kiểm tra lại.", Toast.LENGTH_SHORT).show()
                     binding.progressBar.visibility = View.GONE
                 }else{
-                    val imageStorageRef = FirebaseStorage.getInstance().reference.child("profile_images")
-                    val imageFileName = UUID.randomUUID().toString() // Tên file ảnh duy nhất
-                    val imageRef = imageStorageRef.child("$imageFileName.jpg")
+                    if (isStudentIdExist(studentId)){
+                        Toast.makeText(requireContext(), "Mã số sinh viên đã tồn tại. Vui lòng kiểm tra lại.", Toast.LENGTH_SHORT).show()
+                        binding.progressBar.visibility = View.GONE
+                    }else if (isStudentEmailExist(email)){
+                        Toast.makeText(requireContext(), "Email đã tồn tại. Vui lòng kiểm tra lại.", Toast.LENGTH_SHORT).show()
+                        binding.progressBar.visibility = View.GONE
+                    }else if (isStudentPhoneNumberlExist(phoneNumber)){
+                        Toast.makeText(requireContext(), "Số điện thoại đã tồn tại. Vui lòng kiểm tra lại.", Toast.LENGTH_SHORT).show()
+                        binding.progressBar.visibility = View.GONE
+                    }else{
+                        val imageStorageRef = FirebaseStorage.getInstance().reference.child("profile_images")
+                        val imageFileName = UUID.randomUUID().toString() // Tên file ảnh duy nhất
+                        val imageRef = imageStorageRef.child("$imageFileName.jpg")
 
-                    val uploadTask = imageRef.putFile(it)
-                    uploadTask.addOnCompleteListener { task ->
-                        if (task.isSuccessful) {
-                            // Lấy URL của ảnh từ Firebase Storage
-                            imageRef.downloadUrl.addOnSuccessListener { imageUrl ->
-                                // Lưu thông tin người dùng vào Firestore
-                                val userUid = FirebaseAuth.getInstance().currentUser?.uid
-                                // Tạo một đối tượng StudentInfo
-                                val studentInfo = StudentInfo(
-                                    name = name,
-                                    dateOfBirth = dateOfBirth,
-                                    phoneNumber = phoneNumber,
-                                    email = email,
-                                    major = major,
-                                    studentId = studentId,
-                                    classId = classId,
-                                    course = course,
-                                    imageUrl = imageUrl.toString()
-                                )
-                                userUid?.let {
-                                    val firestore = FirebaseFirestore.getInstance()
-                                    val studentCollectionRef = firestore.collection("users").document(userUid).collection("students")
-                                    studentCollectionRef.add(studentInfo)
-                                        .addOnSuccessListener {
-                                            Toast.makeText(requireContext(), "Lưu thành công", Toast.LENGTH_SHORT).show()
-                                            binding.progressBar.visibility = View.GONE
-                                            resetForm()
-                                        }.addOnFailureListener { e ->
-                                            Toast.makeText(requireContext(), "Lỗi: $e", Toast.LENGTH_SHORT).show()
-                                            binding.progressBar.visibility = View.GONE
-                                        }
+                        val uploadTask = imageRef.putFile(it)
+                        uploadTask.addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                // Lấy URL của ảnh từ Firebase Storage
+                                imageRef.downloadUrl.addOnSuccessListener { imageUrl ->
+                                    // Lưu thông tin người dùng vào Firestore
+                                    val userUid = FirebaseAuth.getInstance().currentUser?.uid
+                                    // Tạo một đối tượng StudentInfo
+                                    val studentInfo = StudentInfo(
+                                        name = name,
+                                        dateOfBirth = dateOfBirth,
+                                        phoneNumber = phoneNumber,
+                                        email = email,
+                                        major = major,
+                                        studentId = studentId,
+                                        classId = classId,
+                                        course = course,
+                                        imageUrl = imageUrl.toString()
+                                    )
+                                    userUid?.let {
+                                        val firestore = FirebaseFirestore.getInstance()
+                                        val studentCollectionRef = firestore.collection("users").document(userUid).collection("students")
+                                        studentCollectionRef.add(studentInfo)
+                                            .addOnSuccessListener {
+                                                Toast.makeText(requireContext(), "Lưu thành công", Toast.LENGTH_SHORT).show()
+                                                binding.progressBar.visibility = View.GONE
+                                                resetForm()
+                                            }.addOnFailureListener { e ->
+                                                Toast.makeText(requireContext(), "Lỗi: $e", Toast.LENGTH_SHORT).show()
+                                                binding.progressBar.visibility = View.GONE
+                                            }
 
+                                    }
                                 }
                             }
                         }
                     }
+
                 }
             }
         }
+    }
+
+    private suspend fun isStudentPhoneNumberlExist(phoneNumber: String): Boolean {
+        val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid
+        if (currentUserUid != null) {
+            val firestore = FirebaseFirestore.getInstance()
+
+            // Kiểm tra xem có bất kỳ sinh viên nào có cùng mã số sinh viên, email và số điện thoại hay không
+            val querySnapshot = firestore.collection("users")
+                .document(currentUserUid)
+                .collection("students")
+                .whereEqualTo("phoneNumber", phoneNumber)
+                .get()
+                .await()
+
+            return !querySnapshot.isEmpty
+        }
+        return false
+    }
+
+    private suspend fun isStudentEmailExist(email: String): Boolean {
+        val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid
+        if (currentUserUid != null) {
+            val firestore = FirebaseFirestore.getInstance()
+
+            // Kiểm tra xem có bất kỳ sinh viên nào có cùng mã số sinh viên, email và số điện thoại hay không
+            val querySnapshot = firestore.collection("users")
+                .document(currentUserUid)
+                .collection("students")
+                .whereEqualTo("email", email)
+                .get()
+                .await()
+
+            return !querySnapshot.isEmpty
+        }
+        return false
+    }
+
+    private suspend fun isStudentIdExist(studentId: String): Boolean {
+        val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid
+        if (currentUserUid != null) {
+            val firestore = FirebaseFirestore.getInstance()
+
+            // Kiểm tra xem có bất kỳ sinh viên nào có cùng mã số sinh viên, email và số điện thoại hay không
+            val querySnapshot = firestore.collection("users")
+                .document(currentUserUid)
+                .collection("students")
+                .whereEqualTo("studentId", studentId)
+                .get()
+                .await()
+            return !querySnapshot.isEmpty
+        }
+        return false
     }
 
     private fun openImageChooser() {
