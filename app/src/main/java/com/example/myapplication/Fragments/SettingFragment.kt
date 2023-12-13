@@ -121,7 +121,7 @@ class SettingFragment : Fragment() {
                             .addOnSuccessListener {
                                 // Thành công, cập nhật đường dẫn ảnh mới vào Firestore
                                 val newImageUrl =
-                                    "https://firebasestorage.googleapis.com/v0/b/tuhoc-86488.appspot.com/o/profile_images%2Favtdf.jpg?alt=media&token=5248a330-df3a-4ae0-b254-268f833aa7e5"
+                                    "https://firebasestorage.googleapis.com/v0/b/tuhoc-86488.appspot.com/o/profile_images%2Favtdf.jpg?alt=media&token=18fd7912-2a5e-4dea-a851-76b829266fad"
                                 userDocument.update("profileImageUrl", newImageUrl)
                                     .addOnSuccessListener {
                                         // Thông báo cập nhật thành công

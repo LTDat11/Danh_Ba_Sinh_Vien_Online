@@ -9,7 +9,6 @@ import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.MediaStore
-import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import com.bumptech.glide.Glide
@@ -36,7 +35,6 @@ class InfoActivity : AppCompatActivity() {
     private var data: Intent? = null
     private var selectedImageUri: Uri? = null
     private var isImageSelected = false
-    private var check = false
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityInfoBinding.inflate(layoutInflater)
@@ -72,8 +70,6 @@ class InfoActivity : AppCompatActivity() {
                     } else {
                         // Hiển thị ngày đã chọn lên TextView
                         tvDateNow.text = "$dayOfMonth/${monthOfYear + 1}/$yearSelected"
-                        check = true
-                        showbutton()
                     }
                 }, year, month, day)
                 // Hiển thị DatePickerDialog
@@ -83,35 +79,95 @@ class InfoActivity : AppCompatActivity() {
 
             btnSelectImg.setOnClickListener {
                 openImageChooser()
-                showbutton()
             }
 
             btnDeleteImg.setOnClickListener {
-
+                showDeleteConfirmationDialog()
             }
 
             btnReset.setOnClickListener {
                 showResetConfirmationDialog()
             }
 
-            btnSaveInfo.setOnClickListener {
-
-            }
 
 
         }
 
     }
 
-    private fun showbutton() {
-        binding.apply {
-            if (isImageSelected || check) {
-                btnSaveInfo.visibility = View.VISIBLE
-            } else {
-                btnSaveInfo.visibility = View.GONE
+    private fun showDeleteConfirmationDialog() {
+        AlertDialog.Builder(this)
+            .setTitle("Xác nhận xóa ảnh")
+            .setMessage("Bạn có chắc chắn muốn xóa ảnh?")
+            .setPositiveButton("Xóa") { _, _ ->
+                val studentUid = intent.getStringExtra("studentUid")
+                if (studentUid != null) {
+                    deleteImage(studentUid)
+                }
+
             }
+            .setNegativeButton("Hủy bỏ", null)
+            .show()
+    }
+
+    private fun deleteImage(studentUid: String) {
+        val firestore = FirebaseFirestore.getInstance()
+        val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid
+        if (currentUserUid != null) {
+            firestore.collection("users")
+                .document(currentUserUid)
+                .collection("students")
+                .document(studentUid)
+                .get()
+                .addOnSuccessListener { document ->
+                    if (document.exists()){
+                        val studentInfo = document.toObject(StudentInfo::class.java)
+                        if (studentInfo != null) {
+                            // Hiển thị thông tin sinh viên trên giao diện
+                            var imgageUrl = studentInfo.imageUrl
+                            if (!imgageUrl.isNullOrEmpty() &&imgageUrl.contains("avtdf.jpg")){
+                                Toast.makeText(this@InfoActivity, "Đây là ảnh mặc định và không thể xóa!", Toast.LENGTH_SHORT).show()
+                            }else{
+                                // Tạo StorageReference từ đường dẫn ảnh hiện tại
+                                val currentImageRef = FirebaseStorage.getInstance().getReferenceFromUrl(imgageUrl.toString())
+                                // Xóa ảnh hiện tại trong Firebase Storage
+                                currentImageRef.delete()
+                                    .addOnSuccessListener {
+                                        // Thành công, cập nhật đường dẫn ảnh mới vào Firestore
+                                        val newImageUrl = "https://firebasestorage.googleapis.com/v0/b/tuhoc-86488.appspot.com/o/profile_images%2Favtdf.jpg?alt=media&token=18fd7912-2a5e-4dea-a851-76b829266fad"
+
+                                        firestore.collection("users")
+                                            .document(currentUserUid)
+                                            .collection("students")
+                                            .document(studentUid)
+                                            .update("imageUrl", newImageUrl)
+                                            .addOnSuccessListener {
+                                                // Thông báo cập nhật thành công
+                                                Toast.makeText(this@InfoActivity, "Xóa và cập nhật ảnh thành công!", Toast.LENGTH_SHORT).show()
+                                                // Gọi hàm để hiển thị ảnh mới lên giao diện
+                                                displayStudentInfo(studentUid)
+                                            }
+                                            .addOnFailureListener {
+                                                // Thông báo cập nhật thất bại
+                                                Toast.makeText(this@InfoActivity, "Cập nhật ảnh thất bại!", Toast.LENGTH_SHORT).show()
+                                            }
+                                    }
+                                    .addOnFailureListener {
+                                        // Thông báo xóa ảnh hiện tại thất bại
+                                        Toast.makeText(this@InfoActivity, "Xóa ảnh hiện tại thất bại!", Toast.LENGTH_SHORT).show()
+                                    }
+                            }
+                        }else{
+                            Toast.makeText(this, "Không có thông tin", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+                .addOnFailureListener { exception ->
+                    // Xử lý khi có lỗi xảy ra
+                }
         }
     }
+
 
     private fun showResetConfirmationDialog() {
         AlertDialog.Builder(this)
@@ -133,7 +189,6 @@ class InfoActivity : AppCompatActivity() {
                     data = null
                     selectedImageUri = null
                     isImageSelected = false
-                    check = false
                 }
             }
         }
@@ -152,12 +207,11 @@ class InfoActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == PICK_IMAGE_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null) {
-            this.data = data // Lưu trữ data vào biến data
+            this@InfoActivity.data = data // Lưu trữ data vào biến data
             selectedImageUri = data.data
             selectedImageUri?.let {
                 binding.imgSelected.setImageURI(it)
                 isImageSelected = true //đã chọn ảnh
-                check =true
             }
         }
     }

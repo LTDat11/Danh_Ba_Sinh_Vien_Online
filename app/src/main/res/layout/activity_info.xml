@@ -346,25 +346,6 @@
         android:src="@drawable/baseline_edit_24"
         android:background="@color/white"/>
 
-
-
-    <Button
-        android:visibility="gone"
-        android:id="@+id/btn_save_info"
-        android:layout_width="250dp"
-        android:layout_height="wrap_content"
-        android:text="Lưu"
-        android:textSize="30dp"
-        android:backgroundTint="@color/black"
-        app:layout_constraintTop_toBottomOf="@id/edt_id_course_input"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        android:layout_marginStart="25dp"
-        android:layout_marginEnd="25dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="15dp"/>
-
     <ProgressBar
         android:id="@+id/progress_bar"
         android:visibility="gone"
