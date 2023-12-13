@@ -18,11 +18,18 @@ class SplashScreenActivity : AppCompatActivity() {
 
         binding.apply {
             // Sử dụng Handler để đợi một khoảng thời gian và sau đó chuyển đến trang mới
-            Handler().postDelayed({
+//            Handler().postDelayed({
+//                val intent = Intent(this@SplashScreenActivity, MainActivity::class.java)
+//                startActivity(intent)
+//                finish()
+//            }, SPLASH_TIME_OUT)
+
+            splashImg.alpha = 0f
+            splashImg.animate().setDuration(1500).alpha(1f).withEndAction {
                 val intent = Intent(this@SplashScreenActivity, MainActivity::class.java)
                 startActivity(intent)
                 finish()
-            }, SPLASH_TIME_OUT)
+            }
         }
     }
 }

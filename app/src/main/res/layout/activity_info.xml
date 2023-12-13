@@ -21,7 +21,7 @@
         android:id="@+id/btn_select_img"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Sửa ảnh"
+        android:text="Chọn ảnh"
         android:backgroundTint="@color/black"
         android:textSize="20dp"
         app:layout_constraintStart_toEndOf="@+id/img_selected"
@@ -39,6 +39,16 @@
         app:layout_constraintTop_toBottomOf="@id/btn_select_img"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="15dp" />
+
+    <ImageButton
+        android:id="@+id/btn_reset"
+        app:layout_constraintTop_toBottomOf="@id/btn_delete_img"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/btn_delete_img"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/baseline_refresh_24"
+        android:background="@color/white"/>
 
     <TextView
         android:id="@+id/tv_Name"

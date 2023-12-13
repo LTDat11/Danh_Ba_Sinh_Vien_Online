@@ -66,7 +66,7 @@ class SettingFragment : Fragment() {
             }
 
             //delete img
-            iconEditDelete.setOnClickListener{
+            iconDeleteImg.setOnClickListener{
                 CoroutineScope(Dispatchers.IO).launch {
                     withContext(Dispatchers.Main){
                         showDeleteConfirmationDialog()
