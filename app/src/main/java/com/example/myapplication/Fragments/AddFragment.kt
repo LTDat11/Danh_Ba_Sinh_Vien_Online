@@ -263,7 +263,7 @@ class AddFragment : Fragment() {
                         binding.progressBar.visibility = View.GONE
                     }else{
                         val imageStorageRef = FirebaseStorage.getInstance().reference.child("profile_images")
-                        val imageFileName = UUID.randomUUID().toString() // Tên file ảnh duy nhất
+                        val imageFileName = studentId // Tên file ảnh duy nhất
                         val imageRef = imageStorageRef.child("$imageFileName.jpg")
 
                         val uploadTask = imageRef.putFile(it)

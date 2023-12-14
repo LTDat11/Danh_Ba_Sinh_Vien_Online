@@ -212,34 +212,85 @@ class InfoActivity : AppCompatActivity() {
             selectedImageUri?.let {
                 binding.imgSelected.setImageURI(it)
                 isImageSelected = true //đã chọn ảnh
+                val studentUid = intent.getStringExtra("studentUid")
+                if (studentUid != null) {
+                    updateImage(studentUid, selectedImageUri!!)
+                }
+            }
+        }
+    }
+
+    private fun updateImage(studentUid: String, selectedImageUri: Uri) {
+        CoroutineScope(Dispatchers.IO).launch {
+            withContext(Dispatchers.Main){
+                val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid
+                val firestore = FirebaseFirestore.getInstance()
+                if (currentUserUid != null) {
+                    val storageRef = FirebaseStorage.getInstance().reference.child("profile_images").child("$studentUid.jpg")
+                    // Upload ảnh lên Firebase Storage
+                    storageRef.putFile(selectedImageUri)
+                        .addOnSuccessListener { taskSnapshot ->
+                            // Lấy URL của ảnh đã upload
+                            storageRef.downloadUrl.addOnSuccessListener { downloadUrl ->
+                                //Cập nhật URL vào Firestore
+                                firestore.collection("users")
+                                    .document(currentUserUid)
+                                    .collection("students")
+                                    .document(studentUid)
+                                    .update("imageUrl", downloadUrl.toString())
+                                    .addOnSuccessListener {
+                                        // Thông báo thành công
+                                        Toast.makeText(this@InfoActivity, "Cập nhật ảnh đại diện thành công!", Toast.LENGTH_SHORT).show()
+                                        // Load lại thông tin
+                                        displayStudentInfo(studentUid)
+                                    }
+                                    .addOnFailureListener {
+                                        // Thông báo thất bại
+                                        Toast.makeText(this@InfoActivity, "Cập nhật đường dẫn ảnh vào Firestore thất bại", Toast.LENGTH_SHORT).show()
+                                    }
+                            }
+                                .addOnFailureListener {
+                                    // Thông báo thất bại
+                                    Toast.makeText(this@InfoActivity, "Lấy đường dẫn ảnh từ Storage thất bại", Toast.LENGTH_SHORT).show()
+                                }
+                        }
+                        .addOnFailureListener {
+                            // Thông báo thất bại
+                            Toast.makeText(this@InfoActivity, "Upload ảnh lên Storage thất bại", Toast.LENGTH_SHORT).show()
+                        }
+                }
             }
         }
     }
 
 
     private fun displayStudentInfo(studentUid: String) {
-        val firestore = FirebaseFirestore.getInstance()
-        val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid
-        if (currentUserUid != null) {
-            firestore.collection("users")
-                .document(currentUserUid)
-                .collection("students")
-                .document(studentUid)
-                .get()
-                .addOnSuccessListener { document ->
-                    if (document.exists()){
-                        val studentInfo = document.toObject(StudentInfo::class.java)
-                        if (studentInfo != null) {
-                            // Hiển thị thông tin sinh viên trên giao diện
-                            displayStudentInfo(studentInfo)
-                        }else{
-                            Toast.makeText(this, "Không có thông tin", Toast.LENGTH_SHORT).show()
+        CoroutineScope(Dispatchers.IO).launch {
+            withContext(Dispatchers.Main){
+                val firestore = FirebaseFirestore.getInstance()
+                val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid
+                if (currentUserUid != null) {
+                    firestore.collection("users")
+                        .document(currentUserUid)
+                        .collection("students")
+                        .document(studentUid)
+                        .get()
+                        .addOnSuccessListener { document ->
+                            if (document.exists()){
+                                val studentInfo = document.toObject(StudentInfo::class.java)
+                                if (studentInfo != null) {
+                                    // Hiển thị thông tin sinh viên trên giao diện
+                                    displayStudentInfo(studentInfo)
+                                }else{
+                                    Toast.makeText(this@InfoActivity, "Không có thông tin", Toast.LENGTH_SHORT).show()
+                                }
+                            }
                         }
-                    }
+                        .addOnFailureListener { exception ->
+                            // Xử lý khi có lỗi xảy ra
+                        }
                 }
-                .addOnFailureListener { exception ->
-                    // Xử lý khi có lỗi xảy ra
-                }
+            }
         }
 
     }
