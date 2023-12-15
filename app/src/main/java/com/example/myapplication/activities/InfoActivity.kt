@@ -222,44 +222,70 @@ class InfoActivity : AppCompatActivity() {
 
     private fun updateImage(studentUid: String, selectedImageUri: Uri) {
         CoroutineScope(Dispatchers.IO).launch {
-            withContext(Dispatchers.Main){
+            withContext(Dispatchers.Main) {
                 val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid
                 val firestore = FirebaseFirestore.getInstance()
                 if (currentUserUid != null) {
-                    val storageRef = FirebaseStorage.getInstance().reference.child("profile_images").child("$studentUid.jpg")
-                    // Upload ảnh lên Firebase Storage
-                    storageRef.putFile(selectedImageUri)
-                        .addOnSuccessListener { taskSnapshot ->
-                            // Lấy URL của ảnh đã upload
-                            storageRef.downloadUrl.addOnSuccessListener { downloadUrl ->
-                                //Cập nhật URL vào Firestore
-                                firestore.collection("users")
-                                    .document(currentUserUid)
-                                    .collection("students")
-                                    .document(studentUid)
-                                    .update("imageUrl", downloadUrl.toString())
-                                    .addOnSuccessListener {
-                                        // Thông báo thành công
-                                        Toast.makeText(this@InfoActivity, "Cập nhật ảnh đại diện thành công!", Toast.LENGTH_SHORT).show()
-                                        // Load lại thông tin
-                                        displayStudentInfo(studentUid)
-                                    }
-                                    .addOnFailureListener {
-                                        // Thông báo thất bại
-                                        Toast.makeText(this@InfoActivity, "Cập nhật đường dẫn ảnh vào Firestore thất bại", Toast.LENGTH_SHORT).show()
-                                    }
-                            }
-                                .addOnFailureListener {
-                                    // Thông báo thất bại
-                                    Toast.makeText(this@InfoActivity, "Lấy đường dẫn ảnh từ Storage thất bại", Toast.LENGTH_SHORT).show()
+                    firestore.collection("users")
+                        .document(currentUserUid)
+                        .collection("students")
+                        .document(studentUid)
+                        .get()
+                        .addOnSuccessListener { documentSnapshot ->
+                            if (documentSnapshot.exists()) {
+                                val studentInfo = documentSnapshot.toObject(StudentInfo::class.java)
+                                val currentImageUrl = studentInfo?.imageUrl
+
+                                // Kiểm tra có phải là avtdf hay không
+                                if (!currentImageUrl.isNullOrEmpty() && !currentImageUrl.contains("avtdf.jpg")) {
+                                    val oldImageRef = FirebaseStorage.getInstance().getReferenceFromUrl(currentImageUrl)
+                                    oldImageRef.delete()
+                                        .addOnSuccessListener {
+
+                                            uploadNewImage(studentUid, selectedImageUri)
+                                        }
+                                        .addOnFailureListener {
+                                            Toast.makeText(this@InfoActivity, "Lôĩ khi xóa ảnh", Toast.LENGTH_SHORT).show()
+                                        }
+                                } else {
+                                    uploadNewImage(studentUid, selectedImageUri)
                                 }
-                        }
-                        .addOnFailureListener {
-                            // Thông báo thất bại
-                            Toast.makeText(this@InfoActivity, "Upload ảnh lên Storage thất bại", Toast.LENGTH_SHORT).show()
+                            }
                         }
                 }
             }
+        }
+    }
+
+    private fun uploadNewImage(studentUid: String, selectedImageUri: Uri) {
+        val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid
+        if (currentUserUid != null) {
+            val storageRef = FirebaseStorage.getInstance().reference.child("profile_images").child("$studentUid.jpg")
+            // Up ảnh lên storage
+            storageRef.putFile(selectedImageUri)
+                .addOnSuccessListener { taskSnapshot ->
+                    // Lấy Url từ storage
+                    storageRef.downloadUrl.addOnSuccessListener { downloadUrl ->
+                        // Cập nhật Url vào firestore
+                        FirebaseFirestore.getInstance().collection("users")
+                            .document(currentUserUid)
+                            .collection("students")
+                            .document(studentUid)
+                            .update("imageUrl", downloadUrl.toString())
+                            .addOnSuccessListener {
+                                // Cập nhật Url ảnh vào firestore
+                                Toast.makeText(this@InfoActivity, "Cập nhât ảnh thành công!", Toast.LENGTH_SHORT).show()
+                                // Tải lại thông tin
+                                displayStudentInfo(studentUid)
+                            }
+                            .addOnFailureListener {
+                                Toast.makeText(this@InfoActivity, "Cập ảnh thất bại!", Toast.LENGTH_SHORT).show()
+                            }
+                    }
+                }
+                .addOnFailureListener {
+                    Toast.makeText(this@InfoActivity, "Lỗi khi tải ảnh!", Toast.LENGTH_SHORT).show()
+                }
         }
     }
 
