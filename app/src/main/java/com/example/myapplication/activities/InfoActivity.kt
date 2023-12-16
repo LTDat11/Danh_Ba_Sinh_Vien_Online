@@ -9,6 +9,7 @@ import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.MediaStore
+import android.text.InputType
 import android.view.View
 import android.widget.EditText
 import android.widget.Toast
@@ -22,6 +23,7 @@ import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import java.util.Calendar
 
@@ -100,9 +102,427 @@ class InfoActivity : AppCompatActivity() {
                 showEditNameDialog()
             }
 
+            btnEditPhoneNumber.setOnClickListener {
+                showEditPhoneNumberDialog()
+            }
+
+            btnEditEmail.setOnClickListener {
+                showEditEmailDialog()
+            }
+
+            btnEditMajor.setOnClickListener {
+                showEditMajorDialog()
+            }
+
+            btnEditIdStudent.setOnClickListener {
+                showEditIdStudentDialog()
+            }
+
+            btnEditIdClass.setOnClickListener {
+                showEditIdClassDialog()
+            }
+
+            btnEditIdCourse.setOnClickListener {
+                showEditIdCourseDialog()
+            }
+
 
         }
 
+    }
+
+    private fun showEditIdCourseDialog() {
+        val editText = EditText(this@InfoActivity)
+        editText.hint = "Nhập mã của khóa mới"
+        editText.inputType = InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS
+
+        AlertDialog.Builder(this@InfoActivity)
+            .setTitle("Chỉnh sửa mã khóa")
+            .setView(editText)
+            .setPositiveButton("Lưu") { _, _ ->
+                val studentUid = intent.getStringExtra("studentUid")
+                val newIdCourse = editText.text.toString().trim()
+                if (studentUid != null) {
+                    binding.progressBar.visibility = View.VISIBLE
+                    updateIdCourse(newIdCourse,studentUid)
+                }else{
+                    Toast.makeText(this@InfoActivity, "Lỗi không lấy được thông tin", Toast.LENGTH_SHORT).show()
+                }
+
+            }
+            .setNegativeButton("Hủy bỏ", null)
+            .show()
+    }
+
+    private fun updateIdCourse(newIdCourse: String, studentUid: String) {
+        CoroutineScope(Dispatchers.IO).launch {
+            withContext(Dispatchers.Main){
+                val firestore = FirebaseFirestore.getInstance()
+                val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid
+                if (currentUserUid != null){
+                    firestore.collection("users")
+                        .document(currentUserUid)
+                        .collection("students")
+                        .document(studentUid)
+                        .update("course", newIdCourse)
+                        .addOnSuccessListener {
+                            Toast.makeText(this@InfoActivity, "Cập nhật khóa thành công!", Toast.LENGTH_SHORT).show()
+                            displayStudentInfo(studentUid)
+                        }
+                        .addOnFailureListener {
+                            binding.progressBar.visibility = View.GONE
+                            Toast.makeText(this@InfoActivity, "Cập nhật khóa thất bại!", Toast.LENGTH_SHORT).show()
+                        }
+                }
+            }
+        }
+    }
+
+    private fun showEditIdClassDialog() {
+        val editText = EditText(this@InfoActivity)
+        editText.hint = "Nhập mã lớp mới"
+        editText.inputType = InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS
+
+        AlertDialog.Builder(this@InfoActivity)
+            .setTitle("Chỉnh sửa mã lớp")
+            .setView(editText)
+            .setPositiveButton("Lưu") { _, _ ->
+                val studentUid = intent.getStringExtra("studentUid")
+                val newIdClass = editText.text.toString().trim()
+                if (studentUid != null) {
+                    binding.progressBar.visibility = View.VISIBLE
+                    updateIdClass(newIdClass,studentUid)
+                }else{
+                    Toast.makeText(this@InfoActivity, "Lỗi không lấy được thông tin", Toast.LENGTH_SHORT).show()
+                }
+
+            }
+            .setNegativeButton("Hủy bỏ", null)
+            .show()
+    }
+
+    private fun updateIdClass(newIdClass: String, studentUid: String) {
+        CoroutineScope(Dispatchers.IO).launch {
+            withContext(Dispatchers.Main){
+                val firestore = FirebaseFirestore.getInstance()
+                val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid
+                if (currentUserUid != null){
+                    firestore.collection("users")
+                        .document(currentUserUid)
+                        .collection("students")
+                        .document(studentUid)
+                        .update("classId", newIdClass)
+                        .addOnSuccessListener {
+                            Toast.makeText(this@InfoActivity, "Cập nhật ngành thành công!", Toast.LENGTH_SHORT).show()
+                            displayStudentInfo(studentUid)
+                        }
+                        .addOnFailureListener {
+                            binding.progressBar.visibility = View.GONE
+                            Toast.makeText(this@InfoActivity, "Cập nhật ngành thất bại!", Toast.LENGTH_SHORT).show()
+                        }
+                }
+            }
+        }
+    }
+
+    private fun showEditIdStudentDialog() {
+        val editText = EditText(this@InfoActivity)
+        editText.hint = "Nhập mã số sinh viên mới"
+        editText.inputType = InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS
+
+        AlertDialog.Builder(this@InfoActivity)
+            .setTitle("Chỉnh sửa mã số sinh viên")
+            .setView(editText)
+            .setPositiveButton("Lưu") { _, _ ->
+                val studentUid = intent.getStringExtra("studentUid")
+                val newIdStudent = editText.text.toString().trim()
+                if (studentUid != null && newIdStudent.isNotEmpty()) {
+                    binding.progressBar.visibility = View.VISIBLE
+                        CoroutineScope(Dispatchers.IO).launch {
+                            withContext(Dispatchers.Main){
+                                //Kiểm tra mã số sinh viên đã tồn tại hay chưa
+                                if(isStudentIdExist(newIdStudent)){
+                                    Toast.makeText(this@InfoActivity, "Mã số sinh viên đã tồn tại. Vui lòng kiểm tra lại.", Toast.LENGTH_SHORT).show()
+                                    binding.progressBar.visibility = View.GONE
+                                }else{
+                                    updateIdStudent(newIdStudent,studentUid)
+                                }
+                            }
+                        }
+                }else{
+                    binding.progressBar.visibility = View.GONE
+                    Toast.makeText(this@InfoActivity, "Vui lòng nhập mã số sinh viên mới", Toast.LENGTH_SHORT).show()
+                }
+
+            }
+            .setNegativeButton("Hủy bỏ", null)
+            .show()
+    }
+
+    private fun updateIdStudent(newIdStudent: String, studentUid: String) {
+        CoroutineScope(Dispatchers.IO).launch {
+            withContext(Dispatchers.Main){
+                val firestore = FirebaseFirestore.getInstance()
+                val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid
+                if (currentUserUid != null){
+                    firestore.collection("users")
+                        .document(currentUserUid)
+                        .collection("students")
+                        .document(studentUid)
+                        .update("studentId", newIdStudent)
+                        .addOnSuccessListener {
+                            Toast.makeText(this@InfoActivity, "Cập nhật mã số sinh viên thành công!", Toast.LENGTH_SHORT).show()
+                            displayStudentInfo(studentUid)
+                        }
+                        .addOnFailureListener {
+                            Toast.makeText(this@InfoActivity, "Cập mã số sinh viên thất bại!", Toast.LENGTH_SHORT).show()
+                        }
+                }
+            }
+        }
+    }
+
+    private suspend fun isStudentIdExist(studentId: String): Boolean {
+        val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid
+        if (currentUserUid != null) {
+            val firestore = FirebaseFirestore.getInstance()
+
+            // Kiểm tra xem có bất kỳ sinh viên nào có cùng mã số sinh viên, email và số điện thoại hay không
+            val querySnapshot = firestore.collection("users")
+                .document(currentUserUid)
+                .collection("students")
+                .whereEqualTo("studentId", studentId)
+                .get()
+                .await()
+            return !querySnapshot.isEmpty
+        }
+        return false
+    }
+
+    private fun showEditMajorDialog() {
+        val editText = EditText(this@InfoActivity)
+        editText.hint = "Nhập ngành mới"
+        editText.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_CAP_WORDS
+
+        AlertDialog.Builder(this@InfoActivity)
+            .setTitle("Chỉnh sửa ngành")
+            .setView(editText)
+            .setPositiveButton("Lưu") { _, _ ->
+                val studentUid = intent.getStringExtra("studentUid")
+                val newMajor = editText.text.toString().trim()
+                if (studentUid != null) {
+                    binding.progressBar.visibility = View.VISIBLE
+                    updateMajor(newMajor,studentUid)
+                }else{
+                    Toast.makeText(this@InfoActivity, "Lỗi không lấy được thông tin", Toast.LENGTH_SHORT).show()
+                }
+
+            }
+            .setNegativeButton("Hủy bỏ", null)
+            .show()
+    }
+
+    private fun updateMajor(newMajor: String, studentUid: String) {
+        CoroutineScope(Dispatchers.IO).launch {
+            withContext(Dispatchers.Main){
+                val firestore = FirebaseFirestore.getInstance()
+                val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid
+                if (currentUserUid != null){
+                    firestore.collection("users")
+                        .document(currentUserUid)
+                        .collection("students")
+                        .document(studentUid)
+                        .update("major", newMajor)
+                        .addOnSuccessListener {
+                            Toast.makeText(this@InfoActivity, "Cập nhật ngành thành công!", Toast.LENGTH_SHORT).show()
+                            displayStudentInfo(studentUid)
+                        }
+                        .addOnFailureListener {
+                            binding.progressBar.visibility = View.GONE
+                            Toast.makeText(this@InfoActivity, "Cập nhật tên thất bại!", Toast.LENGTH_SHORT).show()
+                        }
+                }
+            }
+        }
+    }
+
+    private fun showEditEmailDialog() {
+        val editText = EditText(this@InfoActivity)
+        editText.hint = "Nhập email mới"
+        editText.inputType = InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
+
+        AlertDialog.Builder(this@InfoActivity)
+            .setTitle("Chỉnh sửa email")
+            .setView(editText)
+            .setPositiveButton("Lưu") { _, _ ->
+                val studentUid = intent.getStringExtra("studentUid")
+                val newEmail = editText.text.toString().trim()
+                if (studentUid != null && newEmail.isNotEmpty()) {
+                    binding.progressBar.visibility = View.VISIBLE
+                    //Kiểm tra email hợp lệ hay không
+                    if (!isValidEmail(newEmail)){
+                        binding.progressBar.visibility = View.GONE
+                        Toast.makeText(this@InfoActivity, "Email không hợp lệ, vui lòng kiểm tra lại", Toast.LENGTH_SHORT).show()
+                        return@setPositiveButton
+                    }else{
+                        CoroutineScope(Dispatchers.IO).launch {
+                            withContext(Dispatchers.Main){
+                                //Kiểm tra email đã tồn tại hay chưa
+                                if(isStudentEmailExist(newEmail)){
+                                    Toast.makeText(this@InfoActivity, "Email đã tồn tại. Vui lòng kiểm tra lại.", Toast.LENGTH_SHORT).show()
+                                    binding.progressBar.visibility = View.GONE
+                                }else{
+                                    updateEmail(newEmail,studentUid)
+                                }
+                            }
+                        }
+                    }
+
+
+                }else{
+                    binding.progressBar.visibility = View.GONE
+                    Toast.makeText(this@InfoActivity, "Vui lòng nhập email mới", Toast.LENGTH_SHORT).show()
+                }
+
+            }
+            .setNegativeButton("Hủy bỏ", null)
+            .show()
+    }
+
+    private fun updateEmail(newEmail: String, studentUid: String) {
+        CoroutineScope(Dispatchers.IO).launch {
+            withContext(Dispatchers.Main){
+                val firestore = FirebaseFirestore.getInstance()
+                val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid
+                if (currentUserUid != null){
+                    firestore.collection("users")
+                        .document(currentUserUid)
+                        .collection("students")
+                        .document(studentUid)
+                        .update("email", newEmail)
+                        .addOnSuccessListener {
+                            Toast.makeText(this@InfoActivity, "Cập nhật email thành công!", Toast.LENGTH_SHORT).show()
+                            displayStudentInfo(studentUid)
+                        }
+                        .addOnFailureListener {
+                            Toast.makeText(this@InfoActivity, "Cập email thất bại!", Toast.LENGTH_SHORT).show()
+                        }
+                }
+            }
+        }
+    }
+
+    private suspend fun isStudentEmailExist(email: String): Boolean {
+        val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid
+        if (currentUserUid != null) {
+            val firestore = FirebaseFirestore.getInstance()
+
+            // Kiểm tra xem có bất kỳ sinh viên nào có cùng mã số sinh viên, email và số điện thoại hay không
+            val querySnapshot = firestore.collection("users")
+                .document(currentUserUid)
+                .collection("students")
+                .whereEqualTo("email", email)
+                .get()
+                .await()
+
+            return !querySnapshot.isEmpty
+        }
+        return false
+    }
+
+    private fun isValidEmail(email: String): Boolean {
+        val emailRegex = Regex("^[A-Za-z](.*)([@]{1})(.{1,})(\\.)(.{1,})")
+        return emailRegex.matches(email)
+    }
+
+    private fun showEditPhoneNumberDialog() {
+        val editText = EditText(this@InfoActivity)
+        editText.hint = "Nhập số điện thoại mới"
+        editText.inputType = InputType.TYPE_CLASS_PHONE
+
+        AlertDialog.Builder(this@InfoActivity)
+            .setTitle("Chỉnh sửa số điện thoại")
+            .setView(editText)
+            .setPositiveButton("Lưu") { _, _ ->
+                val studentUid = intent.getStringExtra("studentUid")
+                val newPhoneNumber = editText.text.toString().trim()
+                if (studentUid != null && newPhoneNumber.isNotEmpty()) {
+                    binding.progressBar.visibility = View.VISIBLE
+                    //Kiểm tra số điện thoại có hợp lệ hay không
+                    if (!isValidPhoneNumber(newPhoneNumber)){
+                        binding.progressBar.visibility = View.GONE
+                        Toast.makeText(this@InfoActivity, "Số điện thoại không hợp lệ(ít nhất 10 số)", Toast.LENGTH_SHORT).show()
+                        return@setPositiveButton
+                    }else{
+                        CoroutineScope(Dispatchers.IO).launch {
+                            withContext(Dispatchers.Main){
+                                //Kiểm tra số điện thoại đã tồn tại hay chưa
+                                if(isStudentPhoneNumberlExist(newPhoneNumber)){
+                                    Toast.makeText(this@InfoActivity, "Số điện thoại đã tồn tại. Vui lòng kiểm tra lại.", Toast.LENGTH_SHORT).show()
+                                    binding.progressBar.visibility = View.GONE
+                                }else{
+                                    updatePhoneNumber(newPhoneNumber,studentUid)
+                                }
+                            }
+                        }
+                    }
+
+
+                }else{
+                    binding.progressBar.visibility = View.GONE
+                    Toast.makeText(this@InfoActivity, "Vui lòng nhập số điện thoại mới", Toast.LENGTH_SHORT).show()
+                }
+
+            }
+            .setNegativeButton("Hủy bỏ", null)
+            .show()
+    }
+
+    private fun updatePhoneNumber(newPhoneNumber: String, studentUid: String) {
+        CoroutineScope(Dispatchers.IO).launch {
+            withContext(Dispatchers.Main){
+                val firestore = FirebaseFirestore.getInstance()
+                val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid
+                if (currentUserUid != null){
+                    firestore.collection("users")
+                        .document(currentUserUid)
+                        .collection("students")
+                        .document(studentUid)
+                        .update("phoneNumber", newPhoneNumber)
+                        .addOnSuccessListener {
+                            Toast.makeText(this@InfoActivity, "Cập nhật số điện thoại thành công!", Toast.LENGTH_SHORT).show()
+                            displayStudentInfo(studentUid)
+                        }
+                        .addOnFailureListener {
+                            binding.progressBar.visibility = View.GONE
+                            Toast.makeText(this@InfoActivity, "Cập nhật số điện thoại thất bại!", Toast.LENGTH_SHORT).show()
+                        }
+                }
+            }
+        }
+    }
+
+    private fun isValidPhoneNumber(phoneNumber: String): Boolean {
+        val phoneRegex = Regex("^\\d{10,11}\$")
+        return phoneRegex.matches(phoneNumber)
+    }
+
+    private suspend fun isStudentPhoneNumberlExist(phoneNumber: String): Boolean {
+        val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid
+        if (currentUserUid != null) {
+            val firestore = FirebaseFirestore.getInstance()
+
+            // Kiểm tra xem có bất kỳ sinh viên nào có cùng mã số sinh viên, email và số điện thoại hay không
+            val querySnapshot = firestore.collection("users")
+                .document(currentUserUid)
+                .collection("students")
+                .whereEqualTo("phoneNumber", phoneNumber)
+                .get()
+                .await()
+
+            return !querySnapshot.isEmpty
+        }
+        return false
     }
 
     private fun updateDateOfBirth(newDate: String, studentUid: String) {
@@ -131,6 +551,7 @@ class InfoActivity : AppCompatActivity() {
     private fun showEditNameDialog() {
         val editText = EditText(this@InfoActivity)
         editText.hint = "Nhập tên mới"
+        editText.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_CAP_WORDS
 
         AlertDialog.Builder(this@InfoActivity)
             .setTitle("Chỉnh sửa tên")
