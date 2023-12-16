@@ -9,6 +9,8 @@ import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.MediaStore
+import android.view.View
+import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import com.bumptech.glide.Glide
@@ -17,7 +19,6 @@ import com.example.myapplication.models.StudentInfo
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
-import com.google.firebase.storage.StorageReference
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -26,11 +27,7 @@ import java.util.Calendar
 
 
 class InfoActivity : AppCompatActivity() {
-    private lateinit var auth: FirebaseAuth
     lateinit var binding: ActivityInfoBinding
-    private lateinit var firestore: FirebaseFirestore
-    private lateinit var storage: FirebaseStorage
-    private lateinit var storageRef: StorageReference
     private val PICK_IMAGE_REQUEST_CODE = 123
     private var data: Intent? = null
     private var selectedImageUri: Uri? = null
@@ -49,6 +46,7 @@ class InfoActivity : AppCompatActivity() {
         if (studentUid != null) {
             // Lấy thông tin sinh viên từ Firestore bằng UID
             // Hiển thị thông tin sinh viên trên giao diện
+            binding.progressBar.visibility = View.VISIBLE
             displayStudentInfo(studentUid)
         }
 
@@ -70,6 +68,14 @@ class InfoActivity : AppCompatActivity() {
                     } else {
                         // Hiển thị ngày đã chọn lên TextView
                         tvDateNow.text = "$dayOfMonth/${monthOfYear + 1}/$yearSelected"
+                        val newDate = tvDateNow.text.toString().trim()
+                        val studentUid = intent.getStringExtra("studentUid")
+                        if (studentUid != null && ageDifference > 18) {
+                            binding.progressBar.visibility = View.VISIBLE
+                            updateDateOfBirth(newDate,studentUid)
+                        }else{
+                            Toast.makeText(this@InfoActivity, "Kiểm tra lại ngày tháng năm (Lớn hơn hoặc bằng 18)", Toast.LENGTH_SHORT).show()
+                        }
                     }
                 }, year, month, day)
                 // Hiển thị DatePickerDialog
@@ -86,13 +92,86 @@ class InfoActivity : AppCompatActivity() {
             }
 
             btnReset.setOnClickListener {
-                showResetConfirmationDialog()
+                reLoad()
             }
 
+
+            btnEditName.setOnClickListener {
+                showEditNameDialog()
+            }
 
 
         }
 
+    }
+
+    private fun updateDateOfBirth(newDate: String, studentUid: String) {
+        CoroutineScope(Dispatchers.IO).launch {
+            withContext(Dispatchers.Main){
+                val firestore = FirebaseFirestore.getInstance()
+                val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid
+                if (currentUserUid != null){
+                    firestore.collection("users")
+                        .document(currentUserUid)
+                        .collection("students")
+                        .document(studentUid)
+                        .update("dateOfBirth", newDate)
+                        .addOnSuccessListener {
+                            Toast.makeText(this@InfoActivity, "Cập nhật ngày, tháng, năm thành công!", Toast.LENGTH_SHORT).show()
+                            displayStudentInfo(studentUid)
+                        }
+                        .addOnFailureListener {
+                            Toast.makeText(this@InfoActivity, "Cập nhật ngày, tháng, năm thất bại!", Toast.LENGTH_SHORT).show()
+                        }
+                }
+            }
+        }
+    }
+
+    private fun showEditNameDialog() {
+        val editText = EditText(this@InfoActivity)
+        editText.hint = "Nhập tên mới"
+
+        AlertDialog.Builder(this@InfoActivity)
+            .setTitle("Chỉnh sửa tên")
+            .setView(editText)
+            .setPositiveButton("Lưu") { _, _ ->
+                val studentUid = intent.getStringExtra("studentUid")
+                val newName = editText.text.toString().trim()
+                if (studentUid != null && newName.isNotEmpty()) {
+                    binding.progressBar.visibility = View.VISIBLE
+                    updateName(newName,studentUid)
+                }else{
+                    Toast.makeText(this@InfoActivity, "Vui lòng nhập tên mới", Toast.LENGTH_SHORT).show()
+                }
+
+            }
+            .setNegativeButton("Hủy bỏ", null)
+            .show()
+    }
+
+    private fun updateName(newName: String, studentUid: String) {
+        CoroutineScope(Dispatchers.IO).launch {
+            withContext(Dispatchers.Main){
+                val firestore = FirebaseFirestore.getInstance()
+                val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid
+                if (currentUserUid != null){
+                    firestore.collection("users")
+                        .document(currentUserUid)
+                        .collection("students")
+                        .document(studentUid)
+                        .update("name", newName)
+                        .addOnSuccessListener {
+                            Toast.makeText(this@InfoActivity, "Cập nhật tên thành công!", Toast.LENGTH_SHORT).show()
+                            displayStudentInfo(studentUid)
+                        }
+                        .addOnFailureListener {
+                            binding.progressBar.visibility = View.GONE
+                            Toast.makeText(this@InfoActivity, "Cập nhật tên thất bại!", Toast.LENGTH_SHORT).show()
+                        }
+                }
+            }
+        }
     }
 
     private fun showDeleteConfirmationDialog() {
@@ -102,6 +181,7 @@ class InfoActivity : AppCompatActivity() {
             .setPositiveButton("Xóa") { _, _ ->
                 val studentUid = intent.getStringExtra("studentUid")
                 if (studentUid != null) {
+                    binding.progressBar.visibility = View.VISIBLE
                     deleteImage(studentUid)
                 }
 
@@ -125,7 +205,8 @@ class InfoActivity : AppCompatActivity() {
                         if (studentInfo != null) {
                             // Hiển thị thông tin sinh viên trên giao diện
                             var imgageUrl = studentInfo.imageUrl
-                            if (!imgageUrl.isNullOrEmpty() &&imgageUrl.contains("avtdf.jpg")){
+                            if (!imgageUrl.isNullOrEmpty() && imgageUrl.contains("avtdf.jpg")){
+                                binding.progressBar.visibility=View.GONE
                                 Toast.makeText(this@InfoActivity, "Đây là ảnh mặc định và không thể xóa!", Toast.LENGTH_SHORT).show()
                             }else{
                                 // Tạo StorageReference từ đường dẫn ảnh hiện tại
@@ -148,16 +229,19 @@ class InfoActivity : AppCompatActivity() {
                                                 displayStudentInfo(studentUid)
                                             }
                                             .addOnFailureListener {
+                                                binding.progressBar.visibility=View.GONE
                                                 // Thông báo cập nhật thất bại
                                                 Toast.makeText(this@InfoActivity, "Cập nhật ảnh thất bại!", Toast.LENGTH_SHORT).show()
                                             }
                                     }
                                     .addOnFailureListener {
+                                        binding.progressBar.visibility=View.GONE
                                         // Thông báo xóa ảnh hiện tại thất bại
                                         Toast.makeText(this@InfoActivity, "Xóa ảnh hiện tại thất bại!", Toast.LENGTH_SHORT).show()
                                     }
                             }
                         }else{
+                            binding.progressBar.visibility=View.GONE
                             Toast.makeText(this, "Không có thông tin", Toast.LENGTH_SHORT).show()
                         }
                     }
@@ -168,21 +252,10 @@ class InfoActivity : AppCompatActivity() {
         }
     }
 
-
-    private fun showResetConfirmationDialog() {
-        AlertDialog.Builder(this)
-            .setTitle("Xác nhận đặt lại")
-            .setMessage("Bạn có chắc chắn muốn đặt lại thông tin sinh viên?")
-            .setPositiveButton("Đặt lại") { _, _ ->
-                reset()
-            }
-            .setNegativeButton("Hủy bỏ", null)
-            .show()
-    }
-
-    private fun reset() {
+    private fun reLoad() {
         CoroutineScope(Dispatchers.IO).launch {
             withContext(Dispatchers.Main){
+                binding.progressBar.visibility = View.VISIBLE
                 val studentUid = intent.getStringExtra("studentUid")
                 if (studentUid != null) {
                     displayStudentInfo(studentUid)
@@ -214,6 +287,7 @@ class InfoActivity : AppCompatActivity() {
                 isImageSelected = true //đã chọn ảnh
                 val studentUid = intent.getStringExtra("studentUid")
                 if (studentUid != null) {
+                    binding.progressBar.visibility = View.VISIBLE
                     updateImage(studentUid, selectedImageUri!!)
                 }
             }
@@ -241,10 +315,10 @@ class InfoActivity : AppCompatActivity() {
                                     val oldImageRef = FirebaseStorage.getInstance().getReferenceFromUrl(currentImageUrl)
                                     oldImageRef.delete()
                                         .addOnSuccessListener {
-
                                             uploadNewImage(studentUid, selectedImageUri)
                                         }
                                         .addOnFailureListener {
+                                            binding.progressBar.visibility = View.GONE
                                             Toast.makeText(this@InfoActivity, "Lôĩ khi xóa ảnh", Toast.LENGTH_SHORT).show()
                                         }
                                 } else {
@@ -279,11 +353,13 @@ class InfoActivity : AppCompatActivity() {
                                 displayStudentInfo(studentUid)
                             }
                             .addOnFailureListener {
+                                binding.progressBar.visibility = View.GONE
                                 Toast.makeText(this@InfoActivity, "Cập ảnh thất bại!", Toast.LENGTH_SHORT).show()
                             }
                     }
                 }
                 .addOnFailureListener {
+                    binding.progressBar.visibility = View.GONE
                     Toast.makeText(this@InfoActivity, "Lỗi khi tải ảnh!", Toast.LENGTH_SHORT).show()
                 }
         }
@@ -306,8 +382,10 @@ class InfoActivity : AppCompatActivity() {
                                 val studentInfo = document.toObject(StudentInfo::class.java)
                                 if (studentInfo != null) {
                                     // Hiển thị thông tin sinh viên trên giao diện
+                                    binding.progressBar.visibility = View.GONE
                                     displayStudentInfo(studentInfo)
                                 }else{
+                                    binding.progressBar.visibility = View.GONE
                                     Toast.makeText(this@InfoActivity, "Không có thông tin", Toast.LENGTH_SHORT).show()
                                 }
                             }
