@@ -11,13 +11,14 @@ import com.example.myapplication.R
 import com.example.myapplication.models.StudentInfo
 
 class StudentAdapter(private  val studentList: ArrayList<StudentInfo>): RecyclerView.Adapter<StudentAdapter.StudentViewHolder>() {
-
+    var longPressedPositions: MutableSet<Int> = mutableSetOf()
     inner class StudentViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val imageView: ImageView = itemView.findViewById(R.id.img_student_info)
         val nameTextView: TextView = itemView.findViewById(R.id.tv_name_of_student)
         val phoneNumberTextView: TextView = itemView.findViewById(R.id.tv_phone_of_student)
         val studentIdTextView: TextView = itemView.findViewById(R.id.tv_id_of_student)
         val emailTextView: TextView = itemView.findViewById(R.id.tv_email_of_student)
+        val imgView:ImageView = itemView.findViewById(R.id.imgView)
 
         init {
             itemView.setOnClickListener {
@@ -25,6 +26,20 @@ class StudentAdapter(private  val studentList: ArrayList<StudentInfo>): Recycler
                 if (position != RecyclerView.NO_POSITION) {
                     listener?.onItemClick(studentList[position])
                 }
+            }
+
+            itemView.setOnLongClickListener {
+                val position = adapterPosition
+                        if (position != RecyclerView.NO_POSITION) {
+                            if (longPressedPositions.contains(position)) {
+                                longPressedPositions.remove(position)
+                            } else {
+                                longPressedPositions.add(position)
+                            }
+                            notifyDataSetChanged() // Cập nhật giao diện khi ấn giữ lâu
+                            listener?.onItemLongPress(studentList[position], !longPressedPositions.isEmpty())
+                        }
+                true
             }
         }
 
@@ -38,6 +53,7 @@ class StudentAdapter(private  val studentList: ArrayList<StudentInfo>): Recycler
     }
 
     override fun onBindViewHolder(holder:StudentViewHolder, position: Int) {
+
         val currentItem = studentList[position]
         Glide.with(holder.imageView.context).load(currentItem.imageUrl).into(holder.imageView) // setImageURI từ URL
         holder.nameTextView.text = currentItem.name
@@ -45,7 +61,13 @@ class StudentAdapter(private  val studentList: ArrayList<StudentInfo>): Recycler
         holder.studentIdTextView.text = currentItem.studentId
         holder.emailTextView.text = currentItem.email
 
-
+        if (longPressedPositions.contains(position)) {
+            // Đặt dấu tích khi ấn giữ lâu
+            holder.imgView.visibility = View.VISIBLE
+        } else {
+            // Ẩn dấu tích khi không ấn giữ lâu
+            holder.imgView.visibility = View.GONE
+        }
     }
 
     override fun getItemCount(): Int {
@@ -54,6 +76,8 @@ class StudentAdapter(private  val studentList: ArrayList<StudentInfo>): Recycler
 
     interface OnItemClickListener {
         fun onItemClick(studentInfo: StudentInfo)
+
+        fun onItemLongPress(studentInfo: StudentInfo, isLongPressed: Boolean)
     }
 
     private var listener: OnItemClickListener? = null

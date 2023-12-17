@@ -48,6 +48,10 @@ class HomeFragment : Fragment() {
                 startActivityForResult(intent, INFO_ACTIVITY_REQUEST_CODE)
             }
         }
+
+        override fun onItemLongPress(studentInfo: StudentInfo, isLongPressed: Boolean) {
+
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -114,6 +118,11 @@ class HomeFragment : Fragment() {
                 setupSpinner()
             }
             displayStudentInfo(currentUserUid)
+
+            fab.setOnClickListener {
+
+            }
+
         }
 
         // Inflate the layout for this fragment
