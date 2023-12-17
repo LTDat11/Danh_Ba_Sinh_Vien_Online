@@ -1,5 +1,6 @@
 package com.example.myapplication.Fragments
 
+import android.app.Activity
 import android.content.ContentValues.TAG
 import android.content.Intent
 import android.os.Bundle
@@ -33,6 +34,8 @@ class HomeFragment : Fragment() {
     private val studentList = ArrayList<StudentInfo>()
     lateinit var recyclerView: RecyclerView
     lateinit var swipeRefreshLayout: SwipeRefreshLayout
+    private val INFO_ACTIVITY_REQUEST_CODE = 123
+
 
 
     private val onItemClickListener = object : StudentAdapter.OnItemClickListener {
@@ -42,8 +45,17 @@ class HomeFragment : Fragment() {
             getUidFromFirestore(studentInfo.studentId, FirebaseAuth.getInstance().currentUser?.uid ?: "") { uid ->
                 val intent = Intent(requireContext(), InfoActivity::class.java)
                 intent.putExtra("studentUid", uid)
-                startActivity(intent)
+                startActivityForResult(intent, INFO_ACTIVITY_REQUEST_CODE)
             }
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == INFO_ACTIVITY_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+            // Refresh data when returning from InfoActivity
+            val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid
+            displayStudentInfo(currentUserUid)
         }
     }
 

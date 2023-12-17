@@ -10,7 +10,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="horizontal">
 
         <de.hdodenhof.circleimageview.CircleImageView
@@ -22,17 +22,32 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="10dp">
 
-            <TextView
-                android:id="@+id/tv_name_of_student"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Name of student"
-                android:textSize="25dp"
-                android:textStyle="bold"
-                android:maxLines="1" />
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/tv_name_of_student"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:text="Name of student"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:maxLines="1" />
+
+                <CheckBox
+                    android:id="@+id/checkbox"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"/>
+
+            </LinearLayout>
 
             <TextView
                 android:id="@+id/tv_phone_of_student"
@@ -40,29 +55,27 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="5dp"
                 android:text="Phone of student"
-                android:textSize="25dp"
+                android:textSize="16sp"
                 android:maxLines="1"
                 android:drawableStart="@drawable/baseline_contact_phone_24"/>
 
             <TextView
                 android:id="@+id/tv_email_of_student"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="5dp"
                 android:text="Email of student"
-                android:textSize="25dp"
-                android:textStyle=""
+                android:textSize="16sp"
                 android:maxLines="1"
                 android:drawableStart="@drawable/baseline_contact_mail_24"/>
 
             <TextView
                 android:id="@+id/tv_id_of_student"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="5dp"
                 android:text="ID of student"
-                android:textSize="25dp"
-                android:textStyle=""
+                android:textSize="16sp"
                 android:maxLines="1"
                 android:drawableStart="@drawable/baseline_assignment_ind_24"/>
 

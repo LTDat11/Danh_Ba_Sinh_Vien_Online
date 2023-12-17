@@ -1,5 +1,6 @@
 package com.example.myapplication.activities
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.DatePickerDialog
 import android.content.Intent
@@ -126,9 +127,107 @@ class InfoActivity : AppCompatActivity() {
                 showEditIdCourseDialog()
             }
 
+            btnDeleteInfo.setOnClickListener {
+                showDeleteInfoConfirmationDialog()
+            }
+
 
         }
 
+    }
+
+    private fun showDeleteInfoConfirmationDialog() {
+        AlertDialog.Builder(this)
+            .setTitle("Xác nhận xóa thông tin sinh viên")
+            .setMessage("Bạn có chắc chắn muốn xóa thông tin của sinh viên này?")
+            .setPositiveButton("Xóa") { _, _ ->
+                val studentUid = intent.getStringExtra("studentUid")
+                if (studentUid != null) {
+                    binding.progressBar.visibility = View.VISIBLE
+                    deleteInfo(studentUid)
+                }
+
+            }
+            .setNegativeButton("Hủy bỏ", null)
+            .show()
+    }
+
+    private fun deleteInfo(studentUid: String) {
+        val firestore = FirebaseFirestore.getInstance()
+        val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid
+        if (currentUserUid != null) {
+            firestore.collection("users")
+                .document(currentUserUid)
+                .collection("students")
+                .document(studentUid)
+                .get()
+                .addOnSuccessListener { document ->
+                    if (document.exists()) {
+                        val studentInfo = document.toObject(StudentInfo::class.java)
+
+                        if (studentInfo != null) {
+                            val imageUrl = studentInfo.imageUrl
+
+//                            // Kiểm tra có phải là avtdf hay không ?
+//                            val isDefaultImage = imageUrl == "https://firebasestorage.googleapis.com/v0/b/tuhoc-86488.appspot.com/o/profile_images%2Favtdf.jpg?alt=media&token=2fd12693-ae46-4aa5-afdd-f0f6756321e8"
+
+                            if (imageUrl!!.contains("avtdf.jpg")) {
+                                // Nếu là avtdf, thực hiện xóa thông tin trên firestore
+                                firestore.collection("users")
+                                    .document(currentUserUid)
+                                    .collection("students")
+                                    .document(studentUid)
+                                    .delete()
+                                    .addOnSuccessListener {
+                                        // Xóa thông tin thành công
+                                        binding.progressBar.visibility = View.GONE
+                                        Toast.makeText(this@InfoActivity, "Xóa thông tin thành công", Toast.LENGTH_SHORT).show()
+                                        setResult(Activity.RESULT_OK)
+                                        finish()
+                                    }
+                                    .addOnFailureListener {
+                                        binding.progressBar.visibility = View.GONE
+                                        Toast.makeText(this@InfoActivity, "Xóa thông tin thất bại", Toast.LENGTH_SHORT).show()
+                                    }
+                            } else {
+                                // Nếu không phải là avtdf, xóa ảnh tương ứng trong storage và thông tin trên firestore
+                                val storageRef = FirebaseStorage.getInstance().getReferenceFromUrl(imageUrl.toString())
+                                storageRef.delete()
+                                    .addOnSuccessListener {
+                                        //Xóa ảnh thành công, xóa tiếp thông tin trên firestore
+                                        firestore.collection("users")
+                                            .document(currentUserUid)
+                                            .collection("students")
+                                            .document(studentUid)
+                                            .delete()
+                                            .addOnSuccessListener {
+                                                // Xóa thành công
+                                                binding.progressBar.visibility = View.GONE
+                                                Toast.makeText(this@InfoActivity, "Xóa thông tin và ảnh thành công", Toast.LENGTH_SHORT).show()
+                                                setResult(Activity.RESULT_OK)
+                                                finish()
+                                            }
+                                            .addOnFailureListener {
+                                                binding.progressBar.visibility = View.GONE
+                                                Toast.makeText(this@InfoActivity, "Xóa thông tin thất bại", Toast.LENGTH_SHORT).show()
+                                            }
+                                    }
+                                    .addOnFailureListener {
+                                        binding.progressBar.visibility = View.GONE
+                                        Toast.makeText(this@InfoActivity, "Xóa ảnh thất bại", Toast.LENGTH_SHORT).show()
+                                    }
+                            }
+                        } else {
+                            binding.progressBar.visibility = View.GONE
+                            Toast.makeText(this@InfoActivity, "Không có thông tin sinh viên", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+                .addOnFailureListener { exception ->
+                    binding.progressBar.visibility = View.GONE
+                    Toast.makeText(this@InfoActivity, "Lỗi khi lấy thông tin sinh viên", Toast.LENGTH_SHORT).show()
+                }
+        }
     }
 
     private fun showEditIdCourseDialog() {
@@ -225,6 +324,7 @@ class InfoActivity : AppCompatActivity() {
         }
     }
 
+    @SuppressLint("SuspiciousIndentation")
     private fun showEditIdStudentDialog() {
         val editText = EditText(this@InfoActivity)
         editText.hint = "Nhập mã số sinh viên mới"
@@ -904,6 +1004,11 @@ class InfoActivity : AppCompatActivity() {
 
     }
 
+    override fun onBackPressed() {
+        // Set the result when the back button is pressed
+        setResult(Activity.RESULT_OK)
+        super.onBackPressed()
+    }
 
 
 }

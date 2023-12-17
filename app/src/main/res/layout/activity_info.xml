@@ -346,6 +346,20 @@
         android:src="@drawable/baseline_edit_24"
         android:background="@color/white"/>
 
+    <Button
+        android:id="@+id/btn_delete_info"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Xóa thông tin"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/edt_id_course_input"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginTop="15dp"
+        android:textSize="20dp"
+        android:backgroundTint="@color/red"/>
+
+
     <ProgressBar
         android:id="@+id/progress_bar"
         android:visibility="gone"
