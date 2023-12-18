@@ -23,8 +23,10 @@ import com.example.myapplication.databinding.FragmentHomeBinding
 import com.example.myapplication.models.StudentInfo
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -35,6 +37,7 @@ class HomeFragment : Fragment() {
     lateinit var recyclerView: RecyclerView
     lateinit var swipeRefreshLayout: SwipeRefreshLayout
     private val INFO_ACTIVITY_REQUEST_CODE = 123
+    private val selectedStudentIds = mutableListOf<String>()
 
 
 
@@ -49,9 +52,23 @@ class HomeFragment : Fragment() {
             }
         }
 
-        override fun onItemLongPress(studentInfo: StudentInfo, isLongPressed: Boolean) {
+        override fun onItemLongPress(studentInfo: StudentInfo, isLongPressed: Boolean, selectedStudentIds: List<String>) {
+            // Xử lý khi item được long press
+            if (isLongPressed) {
+                this@HomeFragment.selectedStudentIds.clear()
+                this@HomeFragment.selectedStudentIds.addAll(selectedStudentIds)
+            } else {
+                this@HomeFragment.selectedStudentIds.clear()
+            }
 
+            updateFabVisibility()
         }
+
+
+    }
+
+    private fun updateFabVisibility() {
+        binding.fab.visibility = if (selectedStudentIds.isNotEmpty()) View.VISIBLE else View.GONE
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -75,12 +92,7 @@ class HomeFragment : Fragment() {
             setupSpinner()
             // Bắt sự kiện chọn của Spinner
             spinnerFillter.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                override fun onItemSelected(
-                    parent: AdapterView<*>?,
-                    view: View?,
-                    position: Int,
-                    id: Long
-                ) {
+                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                     // Thực hiện xắp xếp dựa trên mục được chọn
                     sortRecyclerView(position)
                 }
@@ -120,6 +132,10 @@ class HomeFragment : Fragment() {
             displayStudentInfo(currentUserUid)
 
             fab.setOnClickListener {
+                // Gọi hàm để xóa sinh viên dựa trên selectedStudentIds
+                deleteStudents(selectedStudentIds)
+                // Đặt lại selectedStudentIds về trạng thái ban đầu
+//                selectedStudentIds.clear()
 
             }
 
@@ -129,23 +145,142 @@ class HomeFragment : Fragment() {
         return binding.root
     }
 
-    private fun getUidFromFirestore(studentId: String, currentUserUid: String, callback: (String) -> Unit) {
-        val firestore = FirebaseFirestore.getInstance()
-        firestore.collection("users")
-            .document(currentUserUid)
-            .collection("students")
-            .whereEqualTo("studentId", studentId)
-            .get()
-            .addOnSuccessListener { result ->
-                if (!result.isEmpty) {
-                    val document = result.documents[0]
-                    val uid = document.id
-                    callback(uid)
+    override fun onPause() {
+        super.onPause()
+        // Clear selectedStudentIds when the fragment is paused (e.g., navigating away)
+        selectedStudentIds.clear()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Refresh data when returning to the fragment
+        val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid
+        displayStudentInfo(currentUserUid)
+        updateFabVisibility()
+    }
+
+    private fun deleteStudents(selectedStudentIds: List<String>) {
+        CoroutineScope(Dispatchers.IO).launch {
+            withContext(Dispatchers.Main){
+                if (selectedStudentIds.isEmpty()){
+                    Toast.makeText(requireContext(), "không có nội dung được chọn để xóa (ấn giữ nội dung)", Toast.LENGTH_SHORT).show()
+                    return@withContext
+                }
+                for(studentId in selectedStudentIds){
+                    val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid
+                    getUidFromFirestore(studentId,currentUserUid ?: ""){studentUid ->
+                        val firestore = FirebaseFirestore.getInstance()
+                        if (currentUserUid != null){
+                            firestore.collection("users")
+                                .document(currentUserUid)
+                                .collection("students")
+                                .document(studentUid)
+                                .get()
+                                .addOnSuccessListener {document ->
+                                    if (document.exists()){
+                                        val studentInfo = document.toObject(StudentInfo::class.java)
+                                        if (studentInfo != null) {
+                                            // Kiểm tra ảnh để xóa
+                                            val imageUrl = studentInfo.imageUrl
+                                            // Kiểm tra có phải là avtdf hay không ?
+                                            if (imageUrl!!.contains("avtdf.jpg")){
+                                                // Nếu là avtdf, thực hiện xóa thông tin trên firestore
+                                                firestore.collection("users")
+                                                    .document(currentUserUid)
+                                                    .collection("students")
+                                                    .document(studentUid)
+                                                    .delete()
+                                                    .addOnSuccessListener {
+                                                        // Xóa thông tin thành công
+                                                        binding.progressBar.visibility = View.GONE
+                                                        Toast.makeText(requireContext(), "Xóa thông tin thành công", Toast.LENGTH_SHORT).show()
+                                                        this@HomeFragment.selectedStudentIds.clear()
+                                                        displayStudentInfo(currentUserUid)
+                                                        updateFabVisibility()
+                                                    }
+                                                    .addOnFailureListener {
+                                                        binding.progressBar.visibility = View.GONE
+                                                        Toast.makeText(requireContext(), "Xóa thông tin thất bại", Toast.LENGTH_SHORT).show()
+                                                        this@HomeFragment.selectedStudentIds.clear()
+                                                        updateFabVisibility()
+                                                    }
+                                            }else{
+                                                // Nếu không phải là avtdf, xóa ảnh tương ứng trong storage và thông tin trên firestore
+                                                val storageRef = FirebaseStorage.getInstance().getReferenceFromUrl(imageUrl.toString())
+                                                storageRef.delete()
+                                                    .addOnSuccessListener {
+                                                        //Xóa ảnh thành công, xóa tiếp thông tin trên firestore
+                                                        firestore.collection("users")
+                                                            .document(currentUserUid)
+                                                            .collection("students")
+                                                            .document(studentUid)
+                                                            .delete()
+                                                            .addOnSuccessListener {
+                                                                // Xóa thành công
+                                                                binding.progressBar.visibility = View.GONE
+                                                                Toast.makeText(requireContext(), "Xóa thông tin và ảnh thành công", Toast.LENGTH_SHORT).show()
+                                                                displayStudentInfo(currentUserUid)
+                                                                this@HomeFragment.selectedStudentIds.clear()
+                                                                updateFabVisibility()
+                                                            }
+                                                            .addOnFailureListener {
+                                                                binding.progressBar.visibility = View.GONE
+                                                                Toast.makeText(requireContext(), "Xóa thông tin thất bại", Toast.LENGTH_SHORT).show()
+                                                                this@HomeFragment.selectedStudentIds.clear()
+                                                                updateFabVisibility()
+                                                            }
+                                                    }
+                                                    .addOnFailureListener {
+                                                        binding.progressBar.visibility = View.GONE
+                                                        Toast.makeText(requireContext(), "Xóa ảnh thất bại", Toast.LENGTH_SHORT).show()
+                                                        this@HomeFragment.selectedStudentIds.clear()
+                                                        updateFabVisibility()
+                                                    }
+                                            }
+
+                                        }else{
+                                            binding.progressBar.visibility = View.GONE
+                                            Toast.makeText(requireContext(), "Lỗi Không có thông tin", Toast.LENGTH_SHORT).show()
+                                            this@HomeFragment.selectedStudentIds.clear()
+                                            updateFabVisibility()
+                                        }
+                                    }
+                                }.addOnFailureListener { exception ->
+                                    binding.progressBar.visibility = View.GONE
+                                    Toast.makeText(requireContext(), "Lỗi khi lấy thông tin sinh viên", Toast.LENGTH_SHORT).show()
+                                    this@HomeFragment.selectedStudentIds.clear()
+                                    updateFabVisibility()
+                                }
+                        }
+                    }
                 }
             }
-            .addOnFailureListener { exception ->
-                Log.e(TAG, "Error getting UID from Firestore", exception)
+        }
+    }
+
+
+    private fun getUidFromFirestore(studentId: String, currentUserUid: String, callback: (String) -> Unit) {
+        CoroutineScope(Dispatchers.IO).launch {
+            withContext(Dispatchers.Main){
+                val firestore = FirebaseFirestore.getInstance()
+                firestore.collection("users")
+                    .document(currentUserUid)
+                    .collection("students")
+                    .whereEqualTo("studentId", studentId)
+                    .get()
+                    .addOnSuccessListener { result ->
+                        if (!result.isEmpty) {
+                            val document = result.documents[0]
+                            val uid = document.id
+                            callback(uid)
+                        }
+                    }
+                    .addOnFailureListener { exception ->
+                        Log.e(TAG, "Error getting UID from Firestore", exception)
+                    }
             }
+        }
+
     }
 
     //Lọc thông tin theo searchview

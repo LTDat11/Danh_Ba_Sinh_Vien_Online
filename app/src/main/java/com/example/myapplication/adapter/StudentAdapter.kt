@@ -10,8 +10,9 @@ import com.bumptech.glide.Glide
 import com.example.myapplication.R
 import com.example.myapplication.models.StudentInfo
 
-class StudentAdapter(private  val studentList: ArrayList<StudentInfo>): RecyclerView.Adapter<StudentAdapter.StudentViewHolder>() {
+class StudentAdapter(private val studentList: ArrayList<StudentInfo>): RecyclerView.Adapter<StudentAdapter.StudentViewHolder>() {
     var longPressedPositions: MutableSet<Int> = mutableSetOf()
+    var selectedStudentIds: MutableList<String> = mutableListOf()
     inner class StudentViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val imageView: ImageView = itemView.findViewById(R.id.img_student_info)
         val nameTextView: TextView = itemView.findViewById(R.id.tv_name_of_student)
@@ -30,15 +31,19 @@ class StudentAdapter(private  val studentList: ArrayList<StudentInfo>): Recycler
 
             itemView.setOnLongClickListener {
                 val position = adapterPosition
-                        if (position != RecyclerView.NO_POSITION) {
-                            if (longPressedPositions.contains(position)) {
-                                longPressedPositions.remove(position)
-                            } else {
-                                longPressedPositions.add(position)
-                            }
-                            notifyDataSetChanged() // Cập nhật giao diện khi ấn giữ lâu
-                            listener?.onItemLongPress(studentList[position], !longPressedPositions.isEmpty())
-                        }
+                if (position != RecyclerView.NO_POSITION) {
+                    if (longPressedPositions.contains(position)) {
+                        longPressedPositions.remove(position)
+                        val studentIdToRemove = studentList[position].studentId
+                        selectedStudentIds.remove(studentIdToRemove)
+                    } else {
+                        longPressedPositions.add(position)
+                        val studentIdToAdd = studentList[position].studentId
+                        selectedStudentIds.add(studentIdToAdd)
+                    }
+                    notifyDataSetChanged()
+                    listener?.onItemLongPress(studentList[position], !longPressedPositions.isEmpty(), selectedStudentIds)
+                }
                 true
             }
         }
@@ -77,7 +82,7 @@ class StudentAdapter(private  val studentList: ArrayList<StudentInfo>): Recycler
     interface OnItemClickListener {
         fun onItemClick(studentInfo: StudentInfo)
 
-        fun onItemLongPress(studentInfo: StudentInfo, isLongPressed: Boolean)
+        fun onItemLongPress(studentInfo: StudentInfo, isLongPressed: Boolean, selectedStudentIds: List<String>)
     }
 
     private var listener: OnItemClickListener? = null
