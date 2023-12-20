@@ -1,5 +1,8 @@
 package com.example.myapplication.Fragments
 
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkInfo
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -8,6 +11,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.activity.addCallback
 import com.example.myapplication.R
 import com.example.myapplication.databinding.FragmentForgotPassBinding
@@ -24,32 +28,36 @@ class ForgotPassFragment : Fragment() {
         binding.apply {
             val auth = FirebaseAuth.getInstance()
             btnForgotPass.setOnClickListener {
-                val email = forgotPassInput.text.toString()
-                progressBar.visibility = View.VISIBLE
+                if (!isNetworkConnected()){
+                    Toast.makeText(requireContext(), "Vui lòng kiểm tra kết nối mạng và thử lại", Toast.LENGTH_SHORT).show()
+                }else{
+                    val email = forgotPassInput.text.toString()
+                    progressBar.visibility = View.VISIBLE
 
-                if (validateEmail(email)) {
-                    // Kiểm tra xem email có tồn tại trong hệ thống hay không
-                    auth.fetchSignInMethodsForEmail(email)
-                        .addOnCompleteListener { task ->
-                            if (task.isSuccessful) {
-                                val signInMethods = task.result?.signInMethods
-                                if (signInMethods != null && signInMethods.isNotEmpty()) {
-                                    // Email đã được đăng ký, gửi yêu cầu đặt lại mật khẩu
-                                    auth.sendPasswordResetEmail(email)
-                                        .addOnCompleteListener { resetTask ->
-                                            if (resetTask.isSuccessful) {
-                                                showMessage("Đã gửi yêu cầu đặt lại mật khẩu. Vui lòng kiểm tra email của bạn.")
-                                            } else {
-                                                showMessage2("Lỗi: ${resetTask.exception?.message}")
+                    if (validateEmail(email)) {
+                        // Kiểm tra xem email có tồn tại trong hệ thống hay không
+                        auth.fetchSignInMethodsForEmail(email)
+                            .addOnCompleteListener { task ->
+                                if (task.isSuccessful) {
+                                    val signInMethods = task.result?.signInMethods
+                                    if (signInMethods != null && signInMethods.isNotEmpty()) {
+                                        // Email đã được đăng ký, gửi yêu cầu đặt lại mật khẩu
+                                        auth.sendPasswordResetEmail(email)
+                                            .addOnCompleteListener { resetTask ->
+                                                if (resetTask.isSuccessful) {
+                                                    showMessage("Đã gửi yêu cầu đặt lại mật khẩu. Vui lòng kiểm tra email của bạn.")
+                                                } else {
+                                                    showMessage2("Lỗi: ${resetTask.exception?.message}")
+                                                }
                                             }
-                                        }
+                                    } else {
+                                        showMessage2("Email chưa từng được đăng ký.")
+                                    }
                                 } else {
-                                    showMessage2("Email chưa từng được đăng ký.")
+                                    showMessage2("Lỗi: ${task.exception?.message}")
                                 }
-                            } else {
-                                showMessage2("Lỗi: ${task.exception?.message}")
                             }
-                        }
+                    }
                 }
             }
 
@@ -64,6 +72,13 @@ class ForgotPassFragment : Fragment() {
         }
         // Inflate the layout for this fragment
         return binding.root
+    }
+
+    private fun isNetworkConnected(): Boolean {
+        val connectivityManager =
+            requireContext().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val networkInfo: NetworkInfo? = connectivityManager.activeNetworkInfo
+        return networkInfo != null && networkInfo.isConnected
     }
 
     // Hàm kiểm tra địa chỉ email

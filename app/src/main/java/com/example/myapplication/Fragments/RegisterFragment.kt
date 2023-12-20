@@ -1,7 +1,10 @@
 package com.example.myapplication.Fragments
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
+import android.net.ConnectivityManager
+import android.net.NetworkInfo
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
@@ -11,6 +14,7 @@ import android.util.Patterns
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.activity.addCallback
 import androidx.fragment.app.Fragment
 import com.example.myapplication.R
@@ -53,29 +57,35 @@ class RegisterFragment : Fragment() {
             }
             //Click register
             btnRegister.setOnClickListener {
-                val emailInput = emailInput.text.toString().trim()
-                val passwordInput: String = passwordInput.text.toString().trim()
-                val confirmPasswordInput: String = passwordInputConfirm.text.toString().trim()
+                //Kiểm tra kết nối mạng
+                if (!isNetworkConnected()){
+                    Toast.makeText(requireContext(), "Vui lòng kiểm tra kết nối mạng và thử lại", Toast.LENGTH_SHORT).show()
+                }else{
+                    val emailInput = emailInput.text.toString().trim()
+                    val passwordInput: String = passwordInput.text.toString().trim()
+                    val confirmPasswordInput: String = passwordInputConfirm.text.toString().trim()
 
-                if (validate(emailInput, passwordInput, confirmPasswordInput)) {
-                    if (isImageSelected){
-                        progressBar.visibility = View.VISIBLE
-                        CoroutineScope(Dispatchers.IO).launch {
-                            withContext(Dispatchers.Main) {
-                                val selectedImageUri: Uri? = data?.data
-                                selectedImageUri?.let {
-                                    img.setImageURI(it)
-                                    registerWithEmailAndPassword(emailInput, passwordInput, it)
+                    if (validate(emailInput, passwordInput, confirmPasswordInput)) {
+                        if (isImageSelected){
+                            progressBar.visibility = View.VISIBLE
+                            CoroutineScope(Dispatchers.IO).launch {
+                                withContext(Dispatchers.Main) {
+                                    val selectedImageUri: Uri? = data?.data
+                                    selectedImageUri?.let {
+                                        img.setImageURI(it)
+                                        //Đăng ký người dùng có ảnh
+                                        registerWithEmailAndPassword(emailInput, passwordInput, it)
+                                    }
                                 }
                             }
+                        }else{
+                            progressBar.visibility = View.VISIBLE
+                            //Đăng ký người dùng không có ảnh
+                            registerWithEmailAndPassword2(emailInput, passwordInput)
                         }
-                    }else{
-                        progressBar.visibility = View.VISIBLE
-//                        showMessage("Vui lòng chọn ảnh đại diện(Bấm vào ảnh bên trên để chọn)")
-                        registerWithEmailAndPassword2(emailInput, passwordInput)
                     }
-
                 }
+
             }
 
             // Xử lý sự kiện khi nút "quay lại" trên điện thoại được nhấn
@@ -88,6 +98,13 @@ class RegisterFragment : Fragment() {
         }
         // Inflate the layout for this fragment
         return binding.root
+    }
+
+    private fun isNetworkConnected(): Boolean {
+        val connectivityManager =
+            requireContext().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val networkInfo: NetworkInfo? = connectivityManager.activeNetworkInfo
+        return networkInfo != null && networkInfo.isConnected
     }
 
     private fun registerWithEmailAndPassword2(emailInput: String, passwordInput: String) {
