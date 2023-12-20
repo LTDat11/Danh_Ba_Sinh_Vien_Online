@@ -2,7 +2,10 @@ package com.example.myapplication.Fragments
 
 import android.app.Activity
 import android.app.DatePickerDialog
+import android.content.Context
 import android.content.Intent
+import android.net.ConnectivityManager
+import android.net.NetworkInfo
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
@@ -84,53 +87,64 @@ class AddFragment : Fragment() {
             }
 
             btnSaveInfo.setOnClickListener {
-                val name = edtNameInput.text.toString()
-                val dateOfBirth = tvDateNow.text.toString()
-                val phoneNumber = edtPhoneNumberInput.text.toString()
-                val email = edtEmailInput.text.toString()
-                val major = edtMajorInput.text.toString()
-                val studentId = edtIdStudentInput.text.toString()
-                val classId = edtIdClassInput.text.toString()
-                val course = edtIdCourseInput.text.toString()
+            //Check kết nối internet trước khi gọi hàm lưu
+                if (!isNetworkConnected()){
+                    Toast.makeText(requireContext(), "Vui lòng kiểm tra kết nối mạng và thử lại", Toast.LENGTH_SHORT).show()
+                }else{
+                    val name = edtNameInput.text.toString()
+                    val dateOfBirth = tvDateNow.text.toString()
+                    val phoneNumber = edtPhoneNumberInput.text.toString()
+                    val email = edtEmailInput.text.toString()
+                    val major = edtMajorInput.text.toString()
+                    val studentId = edtIdStudentInput.text.toString()
+                    val classId = edtIdClassInput.text.toString()
+                    val course = edtIdCourseInput.text.toString()
 
-                if (name.isEmpty() || phoneNumber.isEmpty() || email.isEmpty() || studentId.isEmpty()) {
-                    // Hiển thị thông báo lỗi nếu các trường bắt buộc chưa được nhập
-                    Toast.makeText(requireContext(), "Vui lòng nhập đầy đủ thông tin bắt buộc(Tên, số đt, email, mã số)", Toast.LENGTH_SHORT).show()
-                    return@setOnClickListener
-                }
-                else{
-                    if (isImageSelected){
-                        progressBar.visibility = View.VISIBLE
-                        CoroutineScope(Dispatchers.IO).launch {
-                            withContext(Dispatchers.Main) {
-                                val selectedImageUri: Uri? = data?.data
-                                selectedImageUri?.let {
-                                    imgSelected.setImageURI(it)
-                                    saveStudentInfo(name,dateOfBirth,phoneNumber,email,major,studentId,classId,course, it)
+                    if (name.isEmpty() || phoneNumber.isEmpty() || email.isEmpty() || studentId.isEmpty()) {
+                        // Hiển thị thông báo lỗi nếu các trường bắt buộc chưa được nhập
+                        Toast.makeText(requireContext(), "Vui lòng nhập đầy đủ thông tin bắt buộc(Tên, số đt, email, mã số)", Toast.LENGTH_SHORT).show()
+                        return@setOnClickListener
+                    }
+                    else{
+                        if (isImageSelected){
+                            progressBar.visibility = View.VISIBLE
+                            CoroutineScope(Dispatchers.IO).launch {
+                                withContext(Dispatchers.Main) {
+                                    val selectedImageUri: Uri? = data?.data
+                                    selectedImageUri?.let {
+                                        imgSelected.setImageURI(it)
+                                        saveStudentInfo(name,dateOfBirth,phoneNumber,email,major,studentId,classId,course, it)
+                                    }
                                 }
                             }
-                        }
-                    }else{
-                        if (!isValidPhoneNumber(phoneNumber)) {
-                            Toast.makeText(requireContext(), "Số điện thoại không hợp lệ(ít nhất 10 số)", Toast.LENGTH_SHORT).show()
-                            return@setOnClickListener
-                        }
+                        }else{
+                            if (!isValidPhoneNumber(phoneNumber)) {
+                                Toast.makeText(requireContext(), "Số điện thoại không hợp lệ(ít nhất 10 số)", Toast.LENGTH_SHORT).show()
+                                return@setOnClickListener
+                            }
 
-                        if (!isValidEmail(email)) {
-                            Toast.makeText(requireContext(), "Email không hợp lệ", Toast.LENGTH_SHORT).show()
-                            return@setOnClickListener
+                            if (!isValidEmail(email)) {
+                                Toast.makeText(requireContext(), "Email không hợp lệ", Toast.LENGTH_SHORT).show()
+                                return@setOnClickListener
+                            }
+                            progressBar.visibility = View.VISIBLE
+                            saveStudentInfo2(name,dateOfBirth,phoneNumber,email,major,studentId,classId,course)
                         }
-                        progressBar.visibility = View.VISIBLE
-                        saveStudentInfo2(name,dateOfBirth,phoneNumber,email,major,studentId,classId,course)
                     }
                 }
+
             }
-
-
         }
 
         // Inflate the layout for this fragment
         return binding.root
+    }
+
+    private fun isNetworkConnected(): Boolean {
+        val connectivityManager =
+            requireContext().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val networkInfo: NetworkInfo? = connectivityManager.activeNetworkInfo
+        return networkInfo != null && networkInfo.isConnected
     }
 
     private fun isValidEmail(email: String): Boolean {

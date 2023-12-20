@@ -1,7 +1,10 @@
 package com.example.myapplication.Fragments
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
+import android.net.ConnectivityManager
+import android.net.NetworkInfo
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
@@ -51,25 +54,37 @@ class SettingFragment : Fragment() {
             btnLogout.setOnClickListener {
                 CoroutineScope(Dispatchers.IO).launch {
                     withContext(Dispatchers.Main){
-                        showLogoutConfirmationDialog()
+                        if (!isNetworkConnected()){
+                            Toast.makeText(requireContext(), "Vui lòng kiểm tra kết nối mạng và thử lại", Toast.LENGTH_SHORT).show()
+                        }else{
+                            showLogoutConfirmationDialog()
+                        }
                     }
                 }
             }
 
-            //edit img
+            //Chỉnh sửa image
             iconEditImg.setOnClickListener {
                 CoroutineScope(Dispatchers.IO).launch{
                     withContext(Dispatchers.Main){
-                        openImageChooser()
+                        if (!isNetworkConnected()){
+                            Toast.makeText(requireContext(), "Vui lòng kiểm tra kết nối mạng và thử lại", Toast.LENGTH_SHORT).show()
+                        }else{
+                            openImageChooser()
+                        }
                     }
                 }
             }
 
-            //delete img
+            //Xóa image
             iconDeleteImg.setOnClickListener{
                 CoroutineScope(Dispatchers.IO).launch {
                     withContext(Dispatchers.Main){
-                        showDeleteConfirmationDialog()
+                        if (!isNetworkConnected()){
+                            Toast.makeText(requireContext(), "Vui lòng kiểm tra kết nối mạng và thử lại", Toast.LENGTH_SHORT).show()
+                        }else{
+                            showDeleteConfirmationDialog()
+                        }
                     }
                 }
             }
@@ -78,7 +93,11 @@ class SettingFragment : Fragment() {
             iconEditName.setOnClickListener {
                 CoroutineScope(Dispatchers.IO).launch{
                     withContext(Dispatchers.Main){
-                        showEditNameDialog()
+                        if (!isNetworkConnected()){
+                            Toast.makeText(requireContext(), "Vui lòng kiểm tra kết nối mạng và thử lại", Toast.LENGTH_SHORT).show()
+                        }else{
+                            showEditNameDialog()
+                        }
                     }
                 }
             }
@@ -88,6 +107,13 @@ class SettingFragment : Fragment() {
 
         // Inflate the layout for this fragment
         return binding.root
+    }
+
+    private fun isNetworkConnected(): Boolean {
+        val connectivityManager =
+            requireContext().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val networkInfo: NetworkInfo? = connectivityManager.activeNetworkInfo
+        return networkInfo != null && networkInfo.isConnected
     }
 
     private fun showDeleteConfirmationDialog() {
@@ -271,6 +297,7 @@ class SettingFragment : Fragment() {
     }
 
     private fun openImageChooser() {
+        //Chọn ảnh từ album
         val galleryIntent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
         startActivityForResult(galleryIntent, PICK_IMAGE_REQUEST_CODE)
     }

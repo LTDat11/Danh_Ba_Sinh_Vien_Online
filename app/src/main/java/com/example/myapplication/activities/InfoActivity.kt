@@ -3,9 +3,12 @@ package com.example.myapplication.activities
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.DatePickerDialog
+import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.Paint
+import android.net.ConnectivityManager
+import android.net.NetworkInfo
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -56,42 +59,55 @@ class InfoActivity : AppCompatActivity() {
         binding.apply {
 
             btnDate.setOnClickListener {
-                val datePickerDialog = DatePickerDialog(this@InfoActivity, DatePickerDialog.OnDateSetListener { _, yearSelected, monthOfYear, dayOfMonth ->
-                    // Tạo một Calendar với ngày được chọn
-                    val selectedDate = Calendar.getInstance()
-                    selectedDate.set(yearSelected, monthOfYear, dayOfMonth)
+                if (!isNetworkConnected()){
+                    Toast.makeText(this@InfoActivity, "Vui lòng kiểm tra kết nối mạng và thử lại", Toast.LENGTH_SHORT).show()
+                }else {
+                    val datePickerDialog = DatePickerDialog(this@InfoActivity, DatePickerDialog.OnDateSetListener { _, yearSelected, monthOfYear, dayOfMonth ->
+                        // Tạo một Calendar với ngày được chọn
+                        val selectedDate = Calendar.getInstance()
+                        selectedDate.set(yearSelected, monthOfYear, dayOfMonth)
 
-                    // Tính toán sự chênh lệch giữa ngày hiện tại và ngày được chọn
-                    val ageDifference = currentDate.get(Calendar.YEAR) - yearSelected
+                        // Tính toán sự chênh lệch giữa ngày hiện tại và ngày được chọn
+                        val ageDifference = currentDate.get(Calendar.YEAR) - yearSelected
 
-                    // Kiểm tra điều kiện nếu nhỏ hơn 18 tuổi
-                    if (ageDifference < 18) {
-                        // Hiển thị thông báo Toast
-                        Toast.makeText(this@InfoActivity, "Bạn chưa đủ 18 tuổi", Toast.LENGTH_SHORT).show()
-                    } else {
-                        // Hiển thị ngày đã chọn lên TextView
-                        tvDateNow.text = "$dayOfMonth/${monthOfYear + 1}/$yearSelected"
-                        val newDate = tvDateNow.text.toString().trim()
-                        val studentUid = intent.getStringExtra("studentUid")
-                        if (studentUid != null && ageDifference > 18) {
-                            binding.progressBar.visibility = View.VISIBLE
-                            updateDateOfBirth(newDate,studentUid)
-                        }else{
-                            Toast.makeText(this@InfoActivity, "Kiểm tra lại ngày tháng năm (Lớn hơn hoặc bằng 18)", Toast.LENGTH_SHORT).show()
+                        // Kiểm tra điều kiện nếu nhỏ hơn 18 tuổi
+                        if (ageDifference < 18) {
+                            // Hiển thị thông báo Toast
+                            Toast.makeText(this@InfoActivity, "Bạn chưa đủ 18 tuổi", Toast.LENGTH_SHORT).show()
+                        } else {
+                            // Hiển thị ngày đã chọn lên TextView
+                            tvDateNow.text = "$dayOfMonth/${monthOfYear + 1}/$yearSelected"
+                            val newDate = tvDateNow.text.toString().trim()
+                            val studentUid = intent.getStringExtra("studentUid")
+                            if (studentUid != null && ageDifference > 18) {
+                                binding.progressBar.visibility = View.VISIBLE
+                                updateDateOfBirth(newDate,studentUid)
+                            }else{
+                                Toast.makeText(this@InfoActivity, "Kiểm tra lại ngày tháng năm (Lớn hơn hoặc bằng 18)", Toast.LENGTH_SHORT).show()
+                            }
                         }
-                    }
-                }, year, month, day)
-                // Hiển thị DatePickerDialog
-                datePickerDialog.show()
+                    }, year, month, day)
+                    // Hiển thị DatePickerDialog
+                    datePickerDialog.show()
+                }
+
             }
 
 
             btnSelectImg.setOnClickListener {
-                openImageChooser()
+                if (!isNetworkConnected()){
+                    Toast.makeText(this@InfoActivity, "Vui lòng kiểm tra kết nối mạng và thử lại", Toast.LENGTH_SHORT).show()
+                }else {
+                    openImageChooser()
+                }
             }
 
             btnDeleteImg.setOnClickListener {
-                showDeleteConfirmationDialog()
+                if (!isNetworkConnected()){
+                    Toast.makeText(this@InfoActivity, "Vui lòng kiểm tra kết nối mạng và thử lại", Toast.LENGTH_SHORT).show()
+                }else {
+                    showDeleteConfirmationDialog()
+                }
             }
 
             btnReset.setOnClickListener {
@@ -100,40 +116,80 @@ class InfoActivity : AppCompatActivity() {
 
 
             btnEditName.setOnClickListener {
-                showEditNameDialog()
+                if (!isNetworkConnected()){
+                    Toast.makeText(this@InfoActivity, "Vui lòng kiểm tra kết nối mạng và thử lại", Toast.LENGTH_SHORT).show()
+                }else {
+                    showEditNameDialog()
+                }
+
             }
 
             btnEditPhoneNumber.setOnClickListener {
-                showEditPhoneNumberDialog()
+                if (!isNetworkConnected()){
+                    Toast.makeText(this@InfoActivity, "Vui lòng kiểm tra kết nối mạng và thử lại", Toast.LENGTH_SHORT).show()
+                }else {
+                    showEditPhoneNumberDialog()
+                }
             }
 
             btnEditEmail.setOnClickListener {
-                showEditEmailDialog()
+                if (!isNetworkConnected()){
+                    Toast.makeText(this@InfoActivity, "Vui lòng kiểm tra kết nối mạng và thử lại", Toast.LENGTH_SHORT).show()
+                }else {
+                    showEditEmailDialog()
+                }
             }
 
             btnEditMajor.setOnClickListener {
-                showEditMajorDialog()
+                if (!isNetworkConnected()){
+                    Toast.makeText(this@InfoActivity, "Vui lòng kiểm tra kết nối mạng và thử lại", Toast.LENGTH_SHORT).show()
+                }else {
+                    showEditMajorDialog()
+                }
             }
 
             btnEditIdStudent.setOnClickListener {
-                showEditIdStudentDialog()
+                if (!isNetworkConnected()){
+                    Toast.makeText(this@InfoActivity, "Vui lòng kiểm tra kết nối mạng và thử lại", Toast.LENGTH_SHORT).show()
+                }else {
+                    showEditIdStudentDialog()
+                }
             }
 
             btnEditIdClass.setOnClickListener {
-                showEditIdClassDialog()
+                if (!isNetworkConnected()){
+                    Toast.makeText(this@InfoActivity, "Vui lòng kiểm tra kết nối mạng và thử lại", Toast.LENGTH_SHORT).show()
+                }else {
+                    showEditIdClassDialog()
+                }
             }
 
             btnEditIdCourse.setOnClickListener {
-                showEditIdCourseDialog()
+                if (!isNetworkConnected()){
+                    Toast.makeText(this@InfoActivity, "Vui lòng kiểm tra kết nối mạng và thử lại", Toast.LENGTH_SHORT).show()
+                }else {
+                    showEditIdCourseDialog()
+                }
             }
 
             btnDeleteInfo.setOnClickListener {
-                showDeleteInfoConfirmationDialog()
+                if (!isNetworkConnected()){
+                    Toast.makeText(this@InfoActivity, "Vui lòng kiểm tra kết nối mạng và thử lại", Toast.LENGTH_SHORT).show()
+                }else {
+                    showDeleteInfoConfirmationDialog()
+                }
             }
 
 
         }
 
+    }
+
+    private fun isNetworkConnected(): Boolean {
+        val connectivityManager =
+            this@InfoActivity.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val networkInfo: NetworkInfo? = connectivityManager.activeNetworkInfo
+        return networkInfo != null && networkInfo.isConnected
     }
 
     private fun showDeleteInfoConfirmationDialog() {
@@ -153,57 +209,37 @@ class InfoActivity : AppCompatActivity() {
     }
 
     private fun deleteInfo(studentUid: String) {
-        val firestore = FirebaseFirestore.getInstance()
-        val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid
-        if (currentUserUid != null) {
-            firestore.collection("users")
-                .document(currentUserUid)
-                .collection("students")
-                .document(studentUid)
-                .get()
-                .addOnSuccessListener { document ->
-                    if (document.exists()) {
-                        val studentInfo = document.toObject(StudentInfo::class.java)
+        CoroutineScope(Dispatchers.IO).launch {
+            withContext(Dispatchers.Main){
+                val firestore = FirebaseFirestore.getInstance()
+                val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid
+                if (currentUserUid != null) {
+                    firestore.collection("users")
+                        .document(currentUserUid)
+                        .collection("students")
+                        .document(studentUid)
+                        .get()
+                        .addOnSuccessListener { document ->
+                            if (document.exists()) {
+                                val studentInfo = document.toObject(StudentInfo::class.java)
 
-                        if (studentInfo != null) {
-                            val imageUrl = studentInfo.imageUrl
+                                if (studentInfo != null) {
+                                    val imageUrl = studentInfo.imageUrl
 
 //                            // Kiểm tra có phải là avtdf hay không ?
 //                            val isDefaultImage = imageUrl == "https://firebasestorage.googleapis.com/v0/b/tuhoc-86488.appspot.com/o/profile_images%2Favtdf.jpg?alt=media&token=2fd12693-ae46-4aa5-afdd-f0f6756321e8"
 
-                            if (imageUrl!!.contains("avtdf.jpg")) {
-                                // Nếu là avtdf, thực hiện xóa thông tin trên firestore
-                                firestore.collection("users")
-                                    .document(currentUserUid)
-                                    .collection("students")
-                                    .document(studentUid)
-                                    .delete()
-                                    .addOnSuccessListener {
-                                        // Xóa thông tin thành công
-                                        binding.progressBar.visibility = View.GONE
-                                        Toast.makeText(this@InfoActivity, "Xóa thông tin thành công", Toast.LENGTH_SHORT).show()
-                                        setResult(Activity.RESULT_OK)
-                                        finish()
-                                    }
-                                    .addOnFailureListener {
-                                        binding.progressBar.visibility = View.GONE
-                                        Toast.makeText(this@InfoActivity, "Xóa thông tin thất bại", Toast.LENGTH_SHORT).show()
-                                    }
-                            } else {
-                                // Nếu không phải là avtdf, xóa ảnh tương ứng trong storage và thông tin trên firestore
-                                val storageRef = FirebaseStorage.getInstance().getReferenceFromUrl(imageUrl.toString())
-                                storageRef.delete()
-                                    .addOnSuccessListener {
-                                        //Xóa ảnh thành công, xóa tiếp thông tin trên firestore
+                                    if (imageUrl!!.contains("avtdf.jpg")) {
+                                        // Nếu là avtdf, thực hiện xóa thông tin trên firestore
                                         firestore.collection("users")
                                             .document(currentUserUid)
                                             .collection("students")
                                             .document(studentUid)
                                             .delete()
                                             .addOnSuccessListener {
-                                                // Xóa thành công
+                                                // Xóa thông tin thành công
                                                 binding.progressBar.visibility = View.GONE
-                                                Toast.makeText(this@InfoActivity, "Xóa thông tin và ảnh thành công", Toast.LENGTH_SHORT).show()
+                                                Toast.makeText(this@InfoActivity, "Xóa thông tin thành công", Toast.LENGTH_SHORT).show()
                                                 setResult(Activity.RESULT_OK)
                                                 finish()
                                             }
@@ -211,23 +247,48 @@ class InfoActivity : AppCompatActivity() {
                                                 binding.progressBar.visibility = View.GONE
                                                 Toast.makeText(this@InfoActivity, "Xóa thông tin thất bại", Toast.LENGTH_SHORT).show()
                                             }
+                                    } else {
+                                        // Nếu không phải là avtdf, xóa ảnh tương ứng trong storage và thông tin trên firestore
+                                        val storageRef = FirebaseStorage.getInstance().getReferenceFromUrl(imageUrl.toString())
+                                        storageRef.delete()
+                                            .addOnSuccessListener {
+                                                //Xóa ảnh thành công, xóa tiếp thông tin trên firestore
+                                                firestore.collection("users")
+                                                    .document(currentUserUid)
+                                                    .collection("students")
+                                                    .document(studentUid)
+                                                    .delete()
+                                                    .addOnSuccessListener {
+                                                        // Xóa thành công
+                                                        binding.progressBar.visibility = View.GONE
+                                                        Toast.makeText(this@InfoActivity, "Xóa thông tin và ảnh thành công", Toast.LENGTH_SHORT).show()
+                                                        setResult(Activity.RESULT_OK)
+                                                        finish()
+                                                    }
+                                                    .addOnFailureListener {
+                                                        binding.progressBar.visibility = View.GONE
+                                                        Toast.makeText(this@InfoActivity, "Xóa thông tin thất bại", Toast.LENGTH_SHORT).show()
+                                                    }
+                                            }
+                                            .addOnFailureListener {
+                                                binding.progressBar.visibility = View.GONE
+                                                Toast.makeText(this@InfoActivity, "Xóa ảnh thất bại", Toast.LENGTH_SHORT).show()
+                                            }
                                     }
-                                    .addOnFailureListener {
-                                        binding.progressBar.visibility = View.GONE
-                                        Toast.makeText(this@InfoActivity, "Xóa ảnh thất bại", Toast.LENGTH_SHORT).show()
-                                    }
+                                } else {
+                                    binding.progressBar.visibility = View.GONE
+                                    Toast.makeText(this@InfoActivity, "Không có thông tin sinh viên", Toast.LENGTH_SHORT).show()
+                                }
                             }
-                        } else {
-                            binding.progressBar.visibility = View.GONE
-                            Toast.makeText(this@InfoActivity, "Không có thông tin sinh viên", Toast.LENGTH_SHORT).show()
                         }
-                    }
+                        .addOnFailureListener { exception ->
+                            binding.progressBar.visibility = View.GONE
+                            Toast.makeText(this@InfoActivity, "Lỗi khi lấy thông tin sinh viên", Toast.LENGTH_SHORT).show()
+                        }
                 }
-                .addOnFailureListener { exception ->
-                    binding.progressBar.visibility = View.GONE
-                    Toast.makeText(this@InfoActivity, "Lỗi khi lấy thông tin sinh viên", Toast.LENGTH_SHORT).show()
-                }
+            }
         }
+
     }
 
     private fun showEditIdCourseDialog() {
@@ -1001,7 +1062,6 @@ class InfoActivity : AppCompatActivity() {
                 builder.show()
             }
         }
-
     }
 
     override fun onBackPressed() {
@@ -1009,6 +1069,5 @@ class InfoActivity : AppCompatActivity() {
         setResult(Activity.RESULT_OK)
         super.onBackPressed()
     }
-
 
 }

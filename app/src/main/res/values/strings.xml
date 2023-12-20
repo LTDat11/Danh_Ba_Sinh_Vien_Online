@@ -5,6 +5,7 @@
 
     <!--spinner    -->
     <string-array name="fillter">
+        <item>Mặc định</item>
         <item>Tên (A-Z)</item>
         <item>Tên (Z-A)</item>
         <item>Mã số (Tăng dần)</item>

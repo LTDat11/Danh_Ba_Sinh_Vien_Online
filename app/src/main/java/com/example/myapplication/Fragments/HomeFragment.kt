@@ -2,7 +2,12 @@ package com.example.myapplication.Fragments
 
 import android.app.Activity
 import android.content.ContentValues.TAG
+import android.content.Context
 import android.content.Intent
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import android.net.NetworkInfo
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -13,6 +18,7 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.SearchView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -21,6 +27,7 @@ import com.example.myapplication.activities.InfoActivity
 import com.example.myapplication.adapter.StudentAdapter
 import com.example.myapplication.databinding.FragmentHomeBinding
 import com.example.myapplication.models.StudentInfo
+import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
@@ -74,7 +81,7 @@ class HomeFragment : Fragment() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == INFO_ACTIVITY_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
-            // Refresh data when returning from InfoActivity
+            // Làm mới dữ liệu khi từ trang info quay lại
             val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid
             displayStudentInfo(currentUserUid)
         }
@@ -127,16 +134,18 @@ class HomeFragment : Fragment() {
             swipeRefreshLayout.setOnRefreshListener {
                 // Làm mới dữ liệu (kéo từ trên xuống)
                 displayStudentInfo(currentUserUid)
+                this@HomeFragment.selectedStudentIds.clear()
+                updateFabVisibility()
                 setupSpinner()
             }
             displayStudentInfo(currentUserUid)
 
             fab.setOnClickListener {
-                // Gọi hàm để xóa sinh viên dựa trên selectedStudentIds
-                deleteStudents(selectedStudentIds)
-                // Đặt lại selectedStudentIds về trạng thái ban đầu
-//                selectedStudentIds.clear()
-
+                if (!isNetworkConnected()){
+                    Toast.makeText(requireContext(), "Vui lòng kiểm tra kết nối mạng và thử lại", Toast.LENGTH_SHORT).show()
+                }else{
+                    showDeleteInfoConfirmationDialog()
+                }
             }
 
         }
@@ -145,15 +154,35 @@ class HomeFragment : Fragment() {
         return binding.root
     }
 
+    private fun isNetworkConnected(): Boolean {
+        val connectivityManager =
+            requireContext().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val networkInfo: NetworkInfo? = connectivityManager.activeNetworkInfo
+        return networkInfo != null && networkInfo.isConnected
+    }
+
+    private fun showDeleteInfoConfirmationDialog() {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Xác nhận xóa thông tin ${selectedStudentIds.size} sinh viên được chọn")
+            .setMessage("Bạn có chắc chắn muốn xóa thông tin của ${selectedStudentIds.size} sinh viên này?")
+            .setPositiveButton("Xóa") { _, _ ->
+                // Gọi hàm để xóa sinh viên dựa trên selectedStudentIds
+                deleteStudents(selectedStudentIds)
+                return@setPositiveButton
+            }
+            .setNegativeButton("Hủy bỏ", null)
+            .show()
+    }
+
     override fun onPause() {
+        //reset lại selectedStudentIds
         super.onPause()
-        // Clear selectedStudentIds when the fragment is paused (e.g., navigating away)
         selectedStudentIds.clear()
     }
 
     override fun onResume() {
         super.onResume()
-        // Refresh data when returning to the fragment
+        // Làm mới khi quay lại trang fragment home
         val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid
         displayStudentInfo(currentUserUid)
         updateFabVisibility()
@@ -292,27 +321,43 @@ class HomeFragment : Fragment() {
                 filteredList.add(student_info)
             }
         }
+
+        val updatedSelectedStudentIds = selectedStudentIds.filter { selectedId ->
+            filteredList.any { it.studentId == selectedId }
+        }
+
+        this@HomeFragment.selectedStudentIds.clear()
+        this@HomeFragment.selectedStudentIds.addAll(updatedSelectedStudentIds)
+        updateFabVisibility()
+
         val adapter = StudentAdapter(filteredList)
+        adapter.setOnItemClickListener(onItemClickListener)
         recyclerView.adapter = adapter
+
+
     }
 
     private fun sortRecyclerView(position: Int) {
         CoroutineScope(Dispatchers.IO).launch {
             withContext(Dispatchers.Main){
                 when (position) {
-                    0 -> {
+                    0 ->{
+                        val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid
+                        displayStudentInfo(currentUserUid)
+                    }
+                    1 -> {
                         // Sắp xếp theo Tên (A-Z)
                         studentList.sortBy { it.name }
                     }
-                    1 -> {
+                    2 -> {
                         // Sắp xếp theo Tên (Z-A)
                         studentList.sortByDescending { it.name }
                     }
-                    2 -> {
+                    3 -> {
                         // Sắp xếp theo Khóa (Tăng dần)
                         studentList.sortBy { it.studentId }
                     }
-                    3 -> {
+                    4 -> {
                         // Sắp xếp theo Khóa (Giảm dần)
                         studentList.sortByDescending { it.studentId }
                     }
