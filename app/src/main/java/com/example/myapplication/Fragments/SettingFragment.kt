@@ -50,6 +50,21 @@ class SettingFragment : Fragment() {
         binding.apply {
             loadUserInfo() // Gọi hàm để load thông tin người dùng
 
+            //Đổi mật khẩu
+            btnChangePass.setOnClickListener {
+                CoroutineScope(Dispatchers.IO).launch {
+                    withContext(Dispatchers.Main) {
+                        if (!isNetworkConnected()){
+                            Toast.makeText(requireContext(), "Vui lòng kiểm tra kết nối mạng và thử lại", Toast.LENGTH_SHORT).show()
+                        }else{
+                            requireActivity().supportFragmentManager.beginTransaction()
+                                .replace(R.id.frame_layout, ChangePassFragment())
+                                .commit()
+                        }
+                    }
+                }
+            }
+
             //Đăng xuất
             btnLogout.setOnClickListener {
                 CoroutineScope(Dispatchers.IO).launch {

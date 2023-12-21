@@ -7,6 +7,8 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.addCallback
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.FragmentTransaction
 import com.example.myapplication.R
 import com.example.myapplication.databinding.FragmentMainPageBinding
@@ -32,9 +34,16 @@ class MainPageFragment : Fragment() {
                 }
                 true
             }
+
         }
         // Inflate the layout for this fragment
         return binding.root
+    }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
+            showExitConfirmationDialog()
+        }
     }
 
     private fun replaceFragment(fragment: Fragment) {
@@ -42,6 +51,17 @@ class MainPageFragment : Fragment() {
         transaction.replace(R.id.fragmentContainer, fragment)
         transaction.addToBackStack(null)
         transaction.commit()
+    }
+
+    private fun showExitConfirmationDialog() {
+        val builder = AlertDialog.Builder(requireContext())
+        builder.setTitle("Xác nhận thoát ứng dụng")
+            .setMessage("Bạn có chắc chắn muốn thoát ứng dụng?")
+            .setPositiveButton("Thoát") { _, _ ->
+                requireActivity().finish()
+            }
+            .setNegativeButton("Hủy bỏ", null)
+            .show()
     }
 
 }

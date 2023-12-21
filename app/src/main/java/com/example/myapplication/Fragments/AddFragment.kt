@@ -25,7 +25,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.util.Calendar
+import java.util.Locale
 import java.util.UUID
 
 class AddFragment : Fragment() {
@@ -110,6 +113,23 @@ class AddFragment : Fragment() {
                             progressBar.visibility = View.VISIBLE
                             CoroutineScope(Dispatchers.IO).launch {
                                 withContext(Dispatchers.Main) {
+                                    if (!isValidPhoneNumber(phoneNumber)) {
+                                        binding.progressBar.visibility = View.GONE
+                                        Toast.makeText(requireContext(), "Số điện thoại không hợp lệ(ít nhất 10 số)", Toast.LENGTH_SHORT).show()
+                                        return@withContext
+                                    }
+
+                                    if (!isValidEmail(email)) {
+                                        binding.progressBar.visibility = View.GONE
+                                        Toast.makeText(requireContext(), "Email không hợp lệ", Toast.LENGTH_SHORT).show()
+                                        return@withContext
+                                    }
+
+                                    if (!isDateOfBirthValid(dateOfBirth)) {
+                                        binding.progressBar.visibility = View.GONE
+                                        Toast.makeText(requireContext(), "Ngày sinh không hợp lệ, chưa đủ 18 tuổi", Toast.LENGTH_SHORT).show()
+                                        return@withContext
+                                    }
                                     val selectedImageUri: Uri? = data?.data
                                     selectedImageUri?.let {
                                         imgSelected.setImageURI(it)
@@ -118,17 +138,29 @@ class AddFragment : Fragment() {
                                 }
                             }
                         }else{
-                            if (!isValidPhoneNumber(phoneNumber)) {
-                                Toast.makeText(requireContext(), "Số điện thoại không hợp lệ(ít nhất 10 số)", Toast.LENGTH_SHORT).show()
-                                return@setOnClickListener
-                            }
+                            CoroutineScope(Dispatchers.IO).launch {
+                                withContext(Dispatchers.Main) {
+                                    if (!isValidPhoneNumber(phoneNumber)) {
+                                        binding.progressBar.visibility = View.GONE
+                                        Toast.makeText(requireContext(), "Số điện thoại không hợp lệ(ít nhất 10 số)", Toast.LENGTH_SHORT).show()
+                                        return@withContext
+                                    }
 
-                            if (!isValidEmail(email)) {
-                                Toast.makeText(requireContext(), "Email không hợp lệ", Toast.LENGTH_SHORT).show()
-                                return@setOnClickListener
+                                    if (!isValidEmail(email)) {
+                                        binding.progressBar.visibility = View.GONE
+                                        Toast.makeText(requireContext(), "Email không hợp lệ", Toast.LENGTH_SHORT).show()
+                                        return@withContext
+                                    }
+
+                                    if (!isDateOfBirthValid(dateOfBirth)) {
+                                        binding.progressBar.visibility = View.GONE
+                                        Toast.makeText(requireContext(), "Ngày sinh không hợp lệ, chưa đủ 18 tuổi", Toast.LENGTH_SHORT).show()
+                                        return@withContext
+                                    }
+                                    progressBar.visibility = View.VISIBLE
+                                    saveStudentInfo2(name,dateOfBirth,phoneNumber,email,major,studentId,classId,course)
+                                }
                             }
-                            progressBar.visibility = View.VISIBLE
-                            saveStudentInfo2(name,dateOfBirth,phoneNumber,email,major,studentId,classId,course)
                         }
                     }
                 }
@@ -138,6 +170,21 @@ class AddFragment : Fragment() {
 
         // Inflate the layout for this fragment
         return binding.root
+    }
+
+    private fun isDateOfBirthValid(dateOfBirth: String): Boolean {
+        val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy", Locale.getDefault())
+        val dob = LocalDate.parse(dateOfBirth, formatter)
+        val currentDate = LocalDate.now()
+
+        val age = currentDate.year - dob.year
+
+        // Kiểm tra nếu dưới 18 tuổi
+        return if (currentDate.monthValue < dob.monthValue || (currentDate.monthValue == dob.monthValue && currentDate.dayOfMonth < dob.dayOfMonth)) {
+            age - 1 >= 18
+        } else {
+            age >= 18
+        }
     }
 
     private fun isNetworkConnected(): Boolean {
