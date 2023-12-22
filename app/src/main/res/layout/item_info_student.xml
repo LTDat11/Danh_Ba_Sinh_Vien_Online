@@ -34,13 +34,22 @@
 
                 <TextView
                     android:id="@+id/tv_name_of_student"
-                    android:layout_width="0dp"
+                    android:layout_width="wrap_content"
                     android:layout_weight="1"
                     android:layout_height="wrap_content"
                     android:text="Name of student"
                     android:textSize="20sp"
                     android:textStyle="bold"
                     android:maxLines="1" />
+
+                <ImageButton
+                    android:id="@+id/menuitem"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/baseline_more_vert_24"
+                    android:background="@color/white"
+                    android:layout_gravity="center"
+                    android:layout_marginEnd="10dp"/>
 
                 <ImageView
                     android:id="@+id/imgView"

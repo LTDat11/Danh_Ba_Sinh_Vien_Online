@@ -1,10 +1,15 @@
 package com.example.myapplication.adapter
 
+import android.content.Intent
+import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
 import android.widget.ImageView
+import android.widget.PopupMenu
 import android.widget.TextView
+import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.myapplication.R
@@ -72,6 +77,74 @@ class StudentAdapter(private val studentList: ArrayList<StudentInfo>): RecyclerV
         } else {
             // Ẩn dấu tích khi không ấn giữ lâu
             holder.imgView.visibility = View.GONE
+        }
+        //Nhấn vào menu trên item
+        holder.itemView.findViewById<ImageButton>(R.id.menuitem).setOnClickListener {
+            var phoneNumber = holder.phoneNumberTextView.text.toString()
+            var email =  holder.emailTextView.text.toString()
+            showPopupMenu(it,phoneNumber,email)
+        }
+    }
+
+    private fun showPopupMenu(it: View?, phoneNumber: String, email: String) {
+        val popupMenu = PopupMenu(it!!.context, it)
+        popupMenu.menuInflater.inflate(R.menu.popup_menu, popupMenu.menu)
+
+        popupMenu.setOnMenuItemClickListener { item ->
+            when (item.itemId) {
+                R.id.menuCall -> {
+                    // Handle call action
+                    handleCallAction(it,phoneNumber)
+                    true
+                }
+                R.id.menuMessage -> {
+                    // Handle message action
+                    handleMessageAction(it,phoneNumber)
+                    true
+                }
+                R.id.menuEmail -> {
+                    // Handle email action
+                    handleEmailAction(it, email)
+                    true
+                }
+                else -> false
+            }
+        }
+
+        // Show the popup menu
+        popupMenu.show()
+    }
+
+    private fun handleMessageAction(it: View, phoneNumber: String) {
+        val intent = Intent(Intent.ACTION_VIEW)
+        intent.data = Uri.fromParts("sms", phoneNumber, null)
+        if (intent.resolveActivity(it.context.packageManager) != null) {
+            it.context.startActivity(intent)
+        } else {
+            Toast.makeText(it.context, "Lỗi", Toast.LENGTH_SHORT).show()
+        }
+
+    }
+
+    private fun handleEmailAction(it: View, email: String) {
+        val intent = Intent(Intent.ACTION_SENDTO)
+        intent.data = Uri.parse("mailto:$email")
+
+        if (intent.resolveActivity(it.context.packageManager) != null) {
+            it.context.startActivity(intent)
+        } else {
+            Toast.makeText(it.context, "Lỗi", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun handleCallAction(it: View, phoneNumber: String) {
+        val intent = Intent(Intent.ACTION_DIAL)
+        intent.data = Uri.parse("tel:$phoneNumber")
+
+        if (intent.resolveActivity(it.context.packageManager) != null) {
+            it.context.startActivity(intent)
+        } else {
+            Toast.makeText(it.context, "Lỗi", Toast.LENGTH_SHORT).show()
         }
     }
 

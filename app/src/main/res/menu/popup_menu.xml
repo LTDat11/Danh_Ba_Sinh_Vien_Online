@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/menuCall"
+        android:title="Gọi" />
+    <item
+        android:id="@+id/menuMessage"
+        android:title="Nhắn tin" />
+    <item
+        android:id="@+id/menuEmail"
+        android:title="Gửi mail" />
+
+</menu>
