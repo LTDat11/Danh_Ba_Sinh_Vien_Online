@@ -82,11 +82,19 @@ class StudentAdapter(private val studentList: ArrayList<StudentInfo>): RecyclerV
         holder.itemView.findViewById<ImageButton>(R.id.menuitem).setOnClickListener {
             var phoneNumber = holder.phoneNumberTextView.text.toString()
             var email =  holder.emailTextView.text.toString()
-            showPopupMenu(it,phoneNumber,email)
+            var name = holder.nameTextView.text.toString()
+            var studentId = holder.studentIdTextView.text.toString()
+            showPopupMenu(it,phoneNumber,email,name,studentId)
         }
     }
 
-    private fun showPopupMenu(it: View?, phoneNumber: String, email: String) {
+    private fun showPopupMenu(
+        it: View?,
+        phoneNumber: String,
+        email: String,
+        name: String,
+        studentId: String
+    ) {
         val popupMenu = PopupMenu(it!!.context, it)
         popupMenu.menuInflater.inflate(R.menu.popup_menu, popupMenu.menu)
 
@@ -107,12 +115,38 @@ class StudentAdapter(private val studentList: ArrayList<StudentInfo>): RecyclerV
                     handleEmailAction(it, email)
                     true
                 }
+                R.id.menuShare -> {
+                    shareStudentInfo(it, phoneNumber, email,name,studentId)
+                    true
+                }
                 else -> false
             }
         }
 
         // Show the popup menu
         popupMenu.show()
+    }
+
+    private fun shareStudentInfo(
+        it: View,
+        phoneNumber: String,
+        email: String,
+        name: String,
+        studentId: String
+    ) {
+        val shareIntent = Intent(Intent.ACTION_SEND)
+        shareIntent.type = "text/plain"
+
+        val shareText = "Họ và tên: $name\n" +"Số điện thoại: $phoneNumber\n" + "Email: $email\n" + "Mã số: $studentId"
+
+        shareIntent.putExtra(Intent.EXTRA_TEXT, shareText)
+
+        val chooser = Intent.createChooser(shareIntent, "Share student info")
+        if (shareIntent.resolveActivity(it.context.packageManager) != null) {
+            it.context.startActivity(chooser)
+        } else {
+            Toast.makeText(it.context, "Không có ứng dụng để chọn", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun handleMessageAction(it: View, phoneNumber: String) {

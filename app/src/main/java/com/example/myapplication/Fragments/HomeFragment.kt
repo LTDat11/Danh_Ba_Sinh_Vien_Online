@@ -334,6 +334,11 @@ class HomeFragment : Fragment() {
         adapter.setOnItemClickListener(onItemClickListener)
         recyclerView.adapter = adapter
 
+        if (filteredList.isEmpty()){
+            binding.tvNoItem?.visibility = View.VISIBLE
+        }else{
+            binding.tvNoItem?.visibility = View.GONE
+        }
 
     }
 

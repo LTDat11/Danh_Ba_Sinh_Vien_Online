@@ -9,5 +9,8 @@
     <item
         android:id="@+id/menuEmail"
         android:title="Gửi mail" />
+    <item
+        android:id="@+id/menuShare"
+        android:title="Chia sẻ" />
 
 </menu>
