@@ -180,9 +180,44 @@ class InfoActivity : AppCompatActivity() {
                 }
             }
 
+            btnShareInfo.setOnClickListener {
+                shareStudentInfo()
+            }
 
         }
 
+    }
+
+    private fun shareStudentInfo() {
+        val shareIntent = Intent(Intent.ACTION_SEND)
+        shareIntent.type = "text/plain"
+
+        val sharedText = buildSharedText()
+
+        shareIntent.putExtra(Intent.EXTRA_TEXT, sharedText)
+        shareIntent.putExtra(Intent.EXTRA_SUBJECT, "Thông tin sinh viên:")
+
+        startActivity(Intent.createChooser(shareIntent, "Chia sẻ thông tin sinh viên"))
+    }
+
+    private fun buildSharedText(): String {
+        val studentName = binding.edtNameInput.text.toString()
+        val studentPhoneNumber = binding.edtPhoneNumberInput.text.toString()
+        val studentEmail = binding.edtEmailInput.text.toString()
+        val studentMajor = binding.edtMajorInput.text.toString()
+        val studentId = binding.edtIdStudentInput.text.toString()
+        val studentClass = binding.edtIdClassInput.text.toString()
+        val studentCourse = binding.edtIdCourseInput.text.toString()
+        val studentDateOfBirth = binding.tvDateNow.text.toString()
+
+            return  "Tên: $studentName\n" +
+                    "Số điện thoại: $studentPhoneNumber\n" +
+                    "Email: $studentEmail\n" +
+                    "Ngành học: $studentMajor\n" +
+                    "Mã số sinh viên: $studentId\n" +
+                    "Lớp: $studentClass\n" +
+                    "Khóa học: $studentCourse\n" +
+                    "Ngày sinh: $studentDateOfBirth"
     }
 
     private fun isNetworkConnected(): Boolean {

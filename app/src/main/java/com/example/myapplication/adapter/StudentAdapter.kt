@@ -140,8 +140,9 @@ class StudentAdapter(private val studentList: ArrayList<StudentInfo>): RecyclerV
         val shareText = "Họ và tên: $name\n" +"Số điện thoại: $phoneNumber\n" + "Email: $email\n" + "Mã số: $studentId"
 
         shareIntent.putExtra(Intent.EXTRA_TEXT, shareText)
+        shareIntent.putExtra(Intent.EXTRA_SUBJECT, "Thông tin sinh viên:")
 
-        val chooser = Intent.createChooser(shareIntent, "Share student info")
+        val chooser = Intent.createChooser(shareIntent, "Chia sẻ thông tin sinh viên")
         if (shareIntent.resolveActivity(it.context.packageManager) != null) {
             it.context.startActivity(chooser)
         } else {
