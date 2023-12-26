@@ -210,14 +210,14 @@ class InfoActivity : AppCompatActivity() {
         val studentCourse = binding.edtIdCourseInput.text.toString()
         val studentDateOfBirth = binding.tvDateNow.text.toString()
 
-            return  "Tên: $studentName\n" +
-                    "Số điện thoại: $studentPhoneNumber\n" +
-                    "Email: $studentEmail\n" +
-                    "Ngành học: $studentMajor\n" +
-                    "Mã số sinh viên: $studentId\n" +
-                    "Lớp: $studentClass\n" +
-                    "Khóa học: $studentCourse\n" +
-                    "Ngày sinh: $studentDateOfBirth"
+        return  "Tên: $studentName\n" +
+                "Số điện thoại: $studentPhoneNumber\n" +
+                "Email: $studentEmail\n" +
+                "Ngành học: $studentMajor\n" +
+                "Mã số sinh viên: $studentId\n" +
+                "Lớp: $studentClass\n" +
+                "Khóa học: $studentCourse\n" +
+                "Ngày sinh: $studentDateOfBirth"
     }
 
     private fun isNetworkConnected(): Boolean {
@@ -951,7 +951,7 @@ class InfoActivity : AppCompatActivity() {
     private fun uploadNewImage(studentUid: String, selectedImageUri: Uri) {
         val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid
         if (currentUserUid != null) {
-            val storageRef = FirebaseStorage.getInstance().reference.child("profile_images").child("$studentUid.jpg")
+            val storageRef = FirebaseStorage.getInstance().reference.child("profile_images/$currentUserUid").child("$studentUid.jpg")
             // Up ảnh lên storage
             storageRef.putFile(selectedImageUri)
                 .addOnSuccessListener { taskSnapshot ->

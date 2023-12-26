@@ -1,6 +1,7 @@
 package com.example.myapplication.Fragments
 
 import android.app.Activity
+import android.content.ContentValues.TAG
 import android.content.Context
 import android.content.Intent
 import android.net.ConnectivityManager
@@ -8,6 +9,7 @@ import android.net.NetworkInfo
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -19,6 +21,7 @@ import com.bumptech.glide.Glide
 import com.example.myapplication.R
 import com.example.myapplication.databinding.FragmentSettingBinding
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
@@ -48,7 +51,22 @@ class SettingFragment : Fragment() {
         storageRef = storage.reference
 
         binding.apply {
-            loadUserInfo() // Gọi hàm để load thông tin người dùng
+            loadUserInfo() //Hàm để load thông tin người dùng
+
+            //Xóa tất cả danh bạ
+
+            btnDeleteAll.setOnClickListener {
+                CoroutineScope(Dispatchers.IO).launch {
+                    withContext(Dispatchers.Main){
+                        if(!isNetworkConnected()){
+                            Toast.makeText(requireContext(), "Vui lòng kiểm tra kết nối mạng và thử lại", Toast.LENGTH_SHORT).show()
+                        }else{
+
+                        }
+                    }
+                }
+            }
+
 
             //Đổi mật khẩu
             btnChangePass.setOnClickListener {
@@ -123,6 +141,7 @@ class SettingFragment : Fragment() {
         // Inflate the layout for this fragment
         return binding.root
     }
+
 
     private fun isNetworkConnected(): Boolean {
         val connectivityManager =
@@ -259,9 +278,10 @@ class SettingFragment : Fragment() {
 
     private fun updateImage() {
         val currentUser = auth.currentUser
+        val email = binding.tvEmail.text.toString()
         currentUser?.let { user ->
             // Tạo đường dẫn tới ảnh trên Firebase Storage
-            val imageRef = storageRef.child("profile_images/${user.uid}.jpg")
+            val imageRef = storageRef.child("profile_images/$email/${user.uid}.jpg")
 
             // Tạo AlertDialog để hiển thị xác nhận
             val confirmationDialog = AlertDialog.Builder(requireContext())

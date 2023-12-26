@@ -188,7 +188,7 @@ class RegisterFragment : Fragment() {
     }
 
     private suspend fun saveImageAndUserInfoToFirestore(imageUri: Uri, email: String) {
-        val imageStorageRef = FirebaseStorage.getInstance().reference.child("profile_images")
+        val imageStorageRef = FirebaseStorage.getInstance().reference.child("profile_images/$email")
         val imageFileName = UUID.randomUUID().toString() // Tên file ảnh duy nhất
         val imageRef = imageStorageRef.child("$imageFileName.jpg")
 

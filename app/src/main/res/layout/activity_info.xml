@@ -363,7 +363,7 @@
         android:id="@+id/btn_share_info"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Chia sẽ"
+        android:text="Chia sẻ"
         app:layout_constraintStart_toEndOf="@+id/btn_delete_info"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/edt_id_course_input"

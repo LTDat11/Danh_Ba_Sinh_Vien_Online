@@ -308,6 +308,7 @@ class AddFragment : Fragment() {
     private fun saveStudentInfo(name: String, dateOfBirth: String, phoneNumber: String, email: String, major: String, studentId: String, classId: String, course: String, it: Uri) {
         CoroutineScope(Dispatchers.IO).launch {
             withContext(Dispatchers.Main) {
+                val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid
                 // Kiểm tra xem mã số sinh viên đã tồn tại chưa
                 if (isStudentInfoExist(studentId,email,phoneNumber)){
                     Toast.makeText(requireContext(), "Thông tin sinh viên đã tồn tại. Vui lòng kiểm tra lại.", Toast.LENGTH_SHORT).show()
@@ -323,7 +324,7 @@ class AddFragment : Fragment() {
                         Toast.makeText(requireContext(), "Số điện thoại đã tồn tại. Vui lòng kiểm tra lại.", Toast.LENGTH_SHORT).show()
                         binding.progressBar.visibility = View.GONE
                     }else{
-                        val imageStorageRef = FirebaseStorage.getInstance().reference.child("profile_images")
+                        val imageStorageRef = FirebaseStorage.getInstance().reference.child("profile_images/$currentUserUid")
                         val imageFileName = studentId // Tên file ảnh duy nhất
                         val imageRef = imageStorageRef.child("$imageFileName.jpg")
 
