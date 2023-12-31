@@ -61,7 +61,7 @@ class SettingFragment : Fragment() {
                         if(!isNetworkConnected()){
                             Toast.makeText(requireContext(), "Vui lòng kiểm tra kết nối mạng và thử lại", Toast.LENGTH_SHORT).show()
                         }else{
-
+                            showDeleAllConfirmationDialog()
                         }
                     }
                 }
@@ -140,6 +140,70 @@ class SettingFragment : Fragment() {
 
         // Inflate the layout for this fragment
         return binding.root
+    }
+
+    private fun showDeleAllConfirmationDialog() {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Xác nhận xóa tất cả các danh bạ")
+            .setMessage("Bạn có chắc chắn muốn xóa tất cả các danh bạ đã lưu?")
+            .setPositiveButton("Xóa") { _, _ ->
+                deleteAllStudentDocuments()
+            }
+            .setNegativeButton("Hủy bỏ", null)
+            .show()
+    }
+
+    private fun deleteAllStudentDocuments() {
+        val userUid = FirebaseAuth.getInstance().currentUser?.uid
+        // Đường dẫn đến thư mục /profile_images/userUid
+        val storageRef = storage.reference.child("profile_images").child(userUid!!)
+
+        val studentCollectionRef = firestore.collection("users").document(userUid!!).collection("students")
+
+        storageRef.listAll()
+            .addOnSuccessListener { result ->
+                // Xóa tất cả các item trong thư mục
+                for (item in result.items) {
+                    item.delete()
+                }
+
+                // Xóa thư mục
+                storageRef.delete()
+                    .addOnSuccessListener {
+                        return@addOnSuccessListener
+                    }
+                    .addOnFailureListener { exception ->
+                        return@addOnFailureListener
+                    }
+            }
+            .addOnFailureListener { exception ->
+                return@addOnFailureListener
+            }
+
+        studentCollectionRef
+            .get()
+            .addOnSuccessListener { documents ->
+                if (documents.isEmpty) {
+                    Toast.makeText(requireContext(), "Không có nội dung để xóa", Toast.LENGTH_SHORT).show()
+                } else {
+                    // Xóa tất cả documents trong collection
+                    for (document in documents) {
+                        document.reference.delete()
+                    }
+
+                    // Sau khi xóa tất cả documents, bạn có thể xóa cả collection nếu cần
+                    firestore.collection("students").document().delete()
+                        .addOnSuccessListener {
+                            Toast.makeText(requireContext(), "Xóa thành công", Toast.LENGTH_SHORT).show()
+                        }
+                        .addOnFailureListener { exception ->
+                            Toast.makeText(requireContext(), "Lỗi, xóa thất bại !!", Toast.LENGTH_SHORT).show()
+                        }
+                }
+            }
+            .addOnFailureListener { exception ->
+                Toast.makeText(requireContext(), "Lỗi, không thể kiểm tra collection: $exception", Toast.LENGTH_SHORT).show()
+            }
     }
 
 
