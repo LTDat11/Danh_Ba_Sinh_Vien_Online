@@ -8,6 +8,8 @@ import android.net.ConnectivityManager
 import android.net.NetworkInfo
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.provider.MediaStore
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -19,6 +21,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import com.bumptech.glide.Glide
 import com.example.myapplication.R
+import com.example.myapplication.activities.ChangePassActivity
 import com.example.myapplication.databinding.FragmentSettingBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
@@ -75,9 +78,11 @@ class SettingFragment : Fragment() {
                         if (!isNetworkConnected()){
                             Toast.makeText(requireContext(), "Vui lòng kiểm tra kết nối mạng và thử lại", Toast.LENGTH_SHORT).show()
                         }else{
-                            requireActivity().supportFragmentManager.beginTransaction()
-                                .replace(R.id.frame_layout, ChangePassFragment())
-                                .commit()
+                            val intent = Intent (requireContext(), ChangePassActivity::class.java)
+                            startActivity(intent)
+//                            requireActivity().supportFragmentManager.beginTransaction()
+//                                .replace(R.id.frame_layout, ChangePassFragment())
+//                                .commit()
                         }
                     }
                 }
@@ -304,6 +309,11 @@ class SettingFragment : Fragment() {
                     }
                 }
             }
+
+            Handler(Looper.getMainLooper()).postDelayed({
+                progressBar.visibility = View.GONE
+                info.visibility = View.VISIBLE
+            }, 1000)
         }
     }
 

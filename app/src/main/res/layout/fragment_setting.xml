@@ -22,14 +22,16 @@
             app:cardElevation="20dp">
 
             <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/info"
+                android:visibility="gone"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="20dp">
 
                 <de.hdodenhof.circleimageview.CircleImageView
                     android:id="@+id/img"
-                    android:layout_width="wrap_content"
-                    android:layout_height="150dp"
+                    android:layout_width="170dp"
+                    android:layout_height="170dp"
                     android:layout_marginTop="10dp"
                     android:src="@drawable/avtdefault"
                     app:layout_constraintEnd_toEndOf="parent"
@@ -126,6 +128,10 @@
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
+            <ProgressBar
+                android:id="@+id/progress_bar"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
 
         </androidx.cardview.widget.CardView>
 

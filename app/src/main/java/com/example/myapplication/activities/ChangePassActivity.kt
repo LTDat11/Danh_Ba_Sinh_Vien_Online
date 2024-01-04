@@ -1,20 +1,20 @@
-package com.example.myapplication.Fragments
+package com.example.myapplication.activities
 
 import android.content.Context
+import android.content.Intent
 import android.net.ConnectivityManager
 import android.net.NetworkInfo
+import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.Toast
-import androidx.activity.addCallback
 import androidx.appcompat.app.AlertDialog
+import com.example.myapplication.Fragments.LoginFragment
 import com.example.myapplication.R
-import com.example.myapplication.databinding.FragmentChangePassBinding
+import com.example.myapplication.databinding.ActivityChangePassBinding
+import com.example.myapplication.databinding.ActivityInfoBinding
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.CoroutineScope
@@ -22,57 +22,38 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-
-class ChangePassFragment : Fragment() {
-    lateinit var binding: FragmentChangePassBinding
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-
-        binding = FragmentChangePassBinding.inflate(layoutInflater,container,false)
-
+class ChangePassActivity : AppCompatActivity() {
+    lateinit var binding: ActivityChangePassBinding
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = ActivityChangePassBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         binding.apply {
-
-
             btnChangePass.setOnClickListener {
-                if (!isNetworkConnected()){
-                    Toast.makeText(requireContext(), "Vui lòng kiểm tra kết nối mạng và thử lại", Toast.LENGTH_SHORT).show()
-                }else {
+                if (!isNetworkConnected()) {
+                    Toast.makeText(
+                        this@ChangePassActivity,
+                        "Vui lòng kiểm tra kết nối mạng và thử lại",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                } else {
                     showChangePassConfirmationDialog()
                 }
             }
-
-
-            requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
-                // Chuyển về Setting Fragment khi nút "quay lại" được nhấn
-                requireActivity().supportFragmentManager.beginTransaction()
-                    .replace(R.id.frame_layout, MainPageFragment())
-                    .commit()
-            }
         }
 
-        // Inflate the layout for this fragment
-        return binding.root
     }
+
     private fun isNetworkConnected(): Boolean {
         val connectivityManager =
-            requireContext().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            this@ChangePassActivity.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val networkInfo: NetworkInfo? = connectivityManager.activeNetworkInfo
         return networkInfo != null && networkInfo.isConnected
     }
 
-    private fun showMessage(s: String) {
-        binding.tvChangePassErro.text = s
-        binding.tvChangePassErro.visibility = View.VISIBLE
-        Handler(Looper.getMainLooper()).postDelayed({
-            binding.tvChangePassErro.visibility = View.GONE
-        }, 5000)
-    }
-
     private fun showChangePassConfirmationDialog() {
-        AlertDialog.Builder(requireContext())
+        AlertDialog.Builder(this@ChangePassActivity)
             .setTitle("Xác nhận đổi mật khẩu")
             .setMessage("Bạn có chắc chắn muốn đổi mật khẩu của tài khoản này?")
             .setPositiveButton("Đồng ý") { _, _ ->
@@ -115,7 +96,11 @@ class ChangePassFragment : Fragment() {
                                 user.updatePassword(newPassword)
                                     .addOnCompleteListener { updatePasswordTask ->
                                         if (updatePasswordTask.isSuccessful) {
-                                            Toast.makeText(requireContext(), "Đổi mật khẩu thành công", Toast.LENGTH_SHORT).show()
+                                            Toast.makeText(
+                                                this@ChangePassActivity,
+                                                "Đổi mật khẩu thành công",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
                                             progressBar.visibility = View.GONE
 
                                             // Đăng xuất khỏi tất cả các thiết bị
@@ -126,13 +111,19 @@ class ChangePassFragment : Fragment() {
                                                         FirebaseAuth.getInstance().signOut()
 
                                                         // Chuyển về trang đăng nhập
-
+                                                        val intent = Intent(this@ChangePassActivity, MainActivity::class.java)
+                                                        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                                        startActivity(intent)
                                                     } else {
                                                         showMessage("Lỗi khi cập nhật token: ${tokenTask.exception?.message}")
                                                     }
                                                 }
                                         } else {
-                                            Toast.makeText(requireContext(), "Lỗi khi đổi mật khẩu", Toast.LENGTH_SHORT).show()
+                                            Toast.makeText(
+                                                this@ChangePassActivity,
+                                                "Lỗi khi đổi mật khẩu",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
                                             progressBar.visibility = View.GONE
                                         }
                                     }
@@ -149,5 +140,11 @@ class ChangePassFragment : Fragment() {
             }
         }
     }
-
+    private fun showMessage(s: String) {
+        binding.tvChangePassErro.text = s
+        binding.tvChangePassErro.visibility = View.VISIBLE
+        Handler(Looper.getMainLooper()).postDelayed({
+            binding.tvChangePassErro.visibility = View.GONE
+        }, 5000)
+    }
 }
