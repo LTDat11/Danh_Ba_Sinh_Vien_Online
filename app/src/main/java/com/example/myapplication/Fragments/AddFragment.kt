@@ -173,7 +173,7 @@ class AddFragment : Fragment() {
     }
 
     private fun isDateOfBirthValid(dateOfBirth: String): Boolean {
-        val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy", Locale.getDefault())
+        val formatter = DateTimeFormatter.ofPattern("M/d/yyyy", Locale.getDefault())
         val dob = LocalDate.parse(dateOfBirth, formatter)
         val currentDate = LocalDate.now()
 
@@ -186,6 +186,7 @@ class AddFragment : Fragment() {
             age >= 18
         }
     }
+
 
     private fun isNetworkConnected(): Boolean {
         val connectivityManager =
