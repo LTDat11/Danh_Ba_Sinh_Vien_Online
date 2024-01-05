@@ -312,7 +312,12 @@ class SettingFragment : Fragment() {
 
             Handler(Looper.getMainLooper()).postDelayed({
                 progressBar.visibility = View.GONE
-                info.visibility = View.VISIBLE
+                img.visibility = View.VISIBLE
+                iconEditImg.visibility = View.VISIBLE
+                iconDeleteImg.visibility = View.VISIBLE
+                tvName.visibility = View.VISIBLE
+                iconEditName.visibility = View.VISIBLE
+                tvEmail.visibility = View.VISIBLE
             }, 1000)
         }
     }

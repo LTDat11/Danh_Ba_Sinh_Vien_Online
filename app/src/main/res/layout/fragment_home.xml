@@ -89,7 +89,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="25dp"
             android:layout_marginEnd="10dp"
-            android:backgroundTint="@color/red"
+            app:backgroundTint="@color/red"
             android:src="@drawable/baseline_delete_24"
             android:visibility="visible"
             app:layout_constraintBottom_toBottomOf="parent"
