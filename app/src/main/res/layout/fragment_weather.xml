@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/sunny"
+    tools:context=".Fragments.WeatherFragment">
+
+   <SearchView
+       android:id="@+id/searchView"
+       android:layout_width="0dp"
+       android:layout_height="wrap_content"
+       android:layout_marginStart="8dp"
+       android:layout_marginTop="24dp"
+       android:layout_marginEnd="8dp"
+       android:background="@drawable/searchviewshape"
+       android:iconifiedByDefault="false"
+       android:queryHint="Nhập tên thành phố"
+       app:layout_constraintEnd_toEndOf="parent"
+       app:layout_constraintStart_toStartOf="parent"
+       app:layout_constraintTop_toTopOf="parent" />
+
+   <TextView
+       android:id="@+id/location"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:layout_marginTop="10dp"
+       android:drawableLeft="@drawable/baseline_location_on_24"
+       android:drawablePadding="15dp"
+       android:text="Địa điểm"
+       app:layout_constraintEnd_toEndOf="parent"
+       app:layout_constraintStart_toStartOf="parent"
+       app:layout_constraintTop_toBottomOf="@+id/searchView" />
+
+
+   <com.airbnb.lottie.LottieAnimationView
+       android:id="@+id/lottieAnimationView"
+       android:layout_width="150dp"
+       android:layout_height="150dp"
+       android:layout_marginStart="16dp"
+       android:layout_marginTop="56dp"
+       app:layout_constraintStart_toStartOf="parent"
+       app:layout_constraintTop_toBottomOf="@+id/location"
+       app:lottie_autoPlay="true"
+       app:lottie_loop="true"
+       app:lottie_rawRes="@raw/sunny" />
+
+   <TextView
+       android:id="@+id/tv_today"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:layout_marginTop="4dp"
+       android:layout_marginEnd="40dp"
+       android:text="Hôm nay"
+       android:textSize="40dp"
+       android:textStyle="bold"
+       app:layout_constraintEnd_toEndOf="parent"
+       app:layout_constraintHorizontal_bias="1.0"
+       app:layout_constraintStart_toEndOf="@+id/lottieAnimationView"
+       app:layout_constraintTop_toBottomOf="@+id/location" />
+
+   <TextView
+       android:id="@+id/textView"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:layout_marginTop="32dp"
+       android:text="30.0°C"
+       android:textSize="60dp"
+       android:textStyle="bold"
+       app:layout_constraintEnd_toEndOf="parent"
+       app:layout_constraintHorizontal_bias="0.497"
+       app:layout_constraintStart_toStartOf="parent"
+       app:layout_constraintTop_toBottomOf="@+id/tv_min" />
+
+   <TextView
+       android:id="@+id/textView3"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:layout_marginTop="16dp"
+       android:text="Trời nắng"
+       android:textAllCaps="true"
+       android:textSize="20dp"
+       app:layout_constraintEnd_toEndOf="@+id/lottieAnimationView"
+       app:layout_constraintHorizontal_bias="0.527"
+       app:layout_constraintStart_toStartOf="@+id/lottieAnimationView"
+       app:layout_constraintTop_toBottomOf="@+id/lottieAnimationView" />
+
+   <TextView
+       android:id="@+id/tv_max"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:layout_marginTop="24dp"
+       android:text="Nhiệt độ lớn nhất: 31°C"
+       app:layout_constraintEnd_toEndOf="parent"
+       app:layout_constraintHorizontal_bias="0.794"
+       app:layout_constraintStart_toStartOf="parent"
+       app:layout_constraintTop_toBottomOf="@+id/tv_date" />
+
+   <TextView
+       android:id="@+id/tv_min"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:layout_marginTop="20dp"
+       android:text="Nhiệt độ nhỏ nhất: 31°C"
+       app:layout_constraintEnd_toEndOf="@+id/tv_max"
+       app:layout_constraintHorizontal_bias="0.0"
+       app:layout_constraintStart_toStartOf="@+id/tv_max"
+       app:layout_constraintTop_toBottomOf="@+id/tv_max" />
+
+   <TextView
+       android:id="@+id/tv_day"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:layout_marginTop="16dp"
+       android:text="Monday"
+       android:textSize="25dp"
+       app:layout_constraintEnd_toEndOf="@+id/tv_today"
+       app:layout_constraintHorizontal_bias="0.434"
+       app:layout_constraintStart_toStartOf="@+id/tv_today"
+       app:layout_constraintTop_toBottomOf="@+id/tv_today" />
+
+   <TextView
+       android:id="@+id/tv_date"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:layout_marginTop="16dp"
+       android:text="12 January 2024"
+       android:textSize="15dp"
+       app:layout_constraintEnd_toEndOf="@+id/tv_day"
+       app:layout_constraintHorizontal_bias="0.476"
+       app:layout_constraintStart_toStartOf="@+id/tv_day"
+       app:layout_constraintTop_toBottomOf="@+id/tv_day" />
+
+   <TextView
+       android:id="@+id/tv_humid"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:layout_marginStart="112dp"
+       android:layout_marginTop="36dp"
+       android:text="Độ ẩm: "
+       android:textSize="20dp"
+       android:textStyle="bold"
+       app:layout_constraintStart_toStartOf="parent"
+       app:layout_constraintTop_toBottomOf="@+id/textView" />
+
+   <TextView
+       android:id="@+id/tv_windspeed"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:layout_marginStart="112dp"
+       android:layout_marginTop="32dp"
+       android:text="Tốc độ gió: "
+       android:textSize="20dp"
+       android:textStyle="bold"
+       app:layout_constraintStart_toStartOf="parent"
+       app:layout_constraintTop_toBottomOf="@+id/tv_humid" />
+
+   <TextView
+       android:id="@+id/tv_apihumid"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:layout_marginTop="36dp"
+       android:text="30%"
+       android:textSize="20dp"
+       app:layout_constraintEnd_toEndOf="parent"
+       app:layout_constraintHorizontal_bias="0.526"
+       app:layout_constraintStart_toEndOf="@+id/tv_humid"
+       app:layout_constraintTop_toBottomOf="@+id/textView" />
+
+   <TextView
+       android:id="@+id/tv_api_winspeed"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:layout_marginTop="32dp"
+       android:text="3.3 m/s"
+       android:textSize="20dp"
+       app:layout_constraintEnd_toEndOf="parent"
+       app:layout_constraintHorizontal_bias="0.448"
+       app:layout_constraintStart_toEndOf="@+id/tv_windspeed"
+       app:layout_constraintTop_toBottomOf="@+id/tv_apihumid" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
