@@ -1,5 +1,7 @@
 package com.example.myapplication.Fragments
 
+
+import android.location.Geocoder
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -22,9 +24,9 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
+
 class WeatherFragment : Fragment() {
     lateinit var binding: FragmentWeatherBinding
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -41,7 +43,6 @@ class WeatherFragment : Fragment() {
 
         return view
     }
-
     private fun searchCity() {
         val searchView = binding.searchView
         searchView.setOnQueryTextListener(object :SearchView.OnQueryTextListener{
@@ -60,6 +61,7 @@ class WeatherFragment : Fragment() {
     }
 
     private fun fetachWeatherData(cityName: String) {
+        //Gọi api openweather
         val retrofit = Retrofit.Builder()
             .addConverterFactory(GsonConverterFactory.create())
             .baseUrl("https://api.openweathermap.org/data/2.5/")
@@ -97,6 +99,7 @@ class WeatherFragment : Fragment() {
                     binding.tvDate.text = formattedDate
 
                     changeImg(condition)
+
                 }
             }
 
@@ -105,54 +108,76 @@ class WeatherFragment : Fragment() {
             }
         })
     }
-
     private fun time(timestamp: Long): String{
         val sdf = SimpleDateFormat("HH:mm", Locale.getDefault())
         return sdf.format((Date(timestamp*1000)))
     }
 
     private fun changeImg(condition: String) {
+        val currentHour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
         when(condition){
-            "Clear Sky", "Sunny", "Clear", "Clouds" ->{
-                binding.root.setBackgroundResource(R.drawable.sunny)
-                binding.lottieAnimationView.setAnimation(R.raw.sunny)
+            "Clear Sky", "Sunny", "Clear"->{
+                //Kiểm tra điều kiện để đổi thành ảnh nền ban đêm
+                if (currentHour >= 18 || currentHour <= 6){
+                    binding.root.setBackgroundResource(R.drawable.night)
+                    binding.lottieAnimationView.setAnimation(R.raw.moon)
+                    changeTextColor()
+                }else{
+                    binding.root.setBackgroundResource(R.drawable.sunny)
+                    binding.lottieAnimationView.setAnimation(R.raw.sunny)
+                }
             }
 
-            "Haze", "Mist", "Partly Clouds", "Overcast", "Foggy" ->{
-                binding.root.setBackgroundResource(R.drawable.cloud_weather)
-                binding.lottieAnimationView.setAnimation(R.raw.cloud)
+            "Haze", "Mist", "Partly Clouds", "Overcast", "Foggy", "Clouds" ->{
+                if (currentHour >= 18 || currentHour <= 6){
+                    binding.root.setBackgroundResource(R.drawable.night)
+                    binding.lottieAnimationView.setAnimation(R.raw.nigthclouds)
+                    changeTextColor()
+                }else {
+                    binding.root.setBackgroundResource(R.drawable.cloud_weather)
+                    binding.lottieAnimationView.setAnimation(R.raw.clouds)
+                }
             }
 
             "Light Rain", "Drizzle", "Moderate Rain", "Showers", "Heavy Rain", "Rain" ->{
-                binding.root.setBackgroundResource(R.drawable.rain_weather)
-                binding.lottieAnimationView.setAnimation(R.raw.rain)
+                if (currentHour >= 18 || currentHour <= 6){
+                    binding.root.setBackgroundResource(R.drawable.night)
+                    binding.lottieAnimationView.setAnimation(R.raw.nightrain)
+                    changeTextColor()
+                }else {
+                    binding.root.setBackgroundResource(R.drawable.rain_weather)
+                    binding.lottieAnimationView.setAnimation(R.raw.rain)
+                    changeTextColor()
+                }
             }
 
             "Light Snow", "Moderate Snow", "Heavy Snow", "Blizzard", "Snow" ->{
-                binding.root.setBackgroundResource(R.drawable.snow_weather)
-                binding.lottieAnimationView.setAnimation(R.raw.snow)
-            }
-        }
-        val currentHour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
-
-        if (currentHour >= 18) {
-            // Đổi ảnh nền thành ban đêm nếu giờ hiện tại lớn hơn hoặc bằng 6 giờ chiều
-            binding.root.setBackgroundResource(R.drawable.night)
-            binding.lottieAnimationView.setAnimation(R.raw.moon)
-            val textViewList = listOf(
-                binding.textView, binding.textView3, binding.tvMax, binding.tvMin,
-                binding.tvApihumid, binding.tvApiWinspeed, binding.tvApiSunrise, binding.tvApiSunset,
-                binding.location, binding.tvDay, binding.tvDate, binding.tvHumid, binding.tvWindspeed,
-                binding.tvSunSet,binding.tvSunRise,binding.tvToday
-            )
-            val locationIcon = ContextCompat.getDrawable(requireContext(), R.drawable.baseline_location_on_24)
-            DrawableCompat.setTint(locationIcon!!, ContextCompat.getColor(requireContext(), android.R.color.white))
-            binding.location.setCompoundDrawablesWithIntrinsicBounds(locationIcon, null, null, null)
-            for (textView in textViewList) {
-                textView.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.white))
+                if (currentHour >= 18 || currentHour <= 6){
+                    binding.root.setBackgroundResource(R.drawable.night)
+                    binding.lottieAnimationView.setAnimation(R.raw.nigthsnow)
+                    changeTextColor()
+                }else {
+                    binding.root.setBackgroundResource(R.drawable.snow_weather)
+                    binding.lottieAnimationView.setAnimation(R.raw.snow)
+                }
             }
         }
         binding.lottieAnimationView.playAnimation()
+    }
+
+    private fun changeTextColor(){
+        val textViewList = listOf(
+            binding.textView, binding.textView3, binding.tvMax, binding.tvMin,
+            binding.tvApihumid, binding.tvApiWinspeed, binding.tvApiSunrise, binding.tvApiSunset,
+            binding.location, binding.tvDay, binding.tvDate, binding.tvHumid, binding.tvWindspeed,
+            binding.tvSunSet,binding.tvSunRise,binding.tvToday
+        )
+        val locationIcon = ContextCompat.getDrawable(requireContext(), R.drawable.baseline_location_on_24)
+        DrawableCompat.setTint(locationIcon!!, ContextCompat.getColor(requireContext(), android.R.color.white))
+        binding.location.setCompoundDrawablesWithIntrinsicBounds(locationIcon, null, null, null)
+        for (textView in textViewList) {
+            textView.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.white))
+        }
     }
 
     private fun convertConditionToVietnamese(condition: String): Any {
