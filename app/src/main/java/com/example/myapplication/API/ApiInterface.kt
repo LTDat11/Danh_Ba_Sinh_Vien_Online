@@ -1,5 +1,6 @@
 package com.example.myapplication.API
 
+import com.example.myapplication.models.City
 import com.example.myapplication.models.Weather
 import retrofit2.Call
 import retrofit2.http.GET
@@ -12,4 +13,11 @@ interface ApiInterface {
         @Query("appid") appid : String,
         @Query("units") units: String
     ): Call<Weather>
+
+    @GET("find")
+    fun getCitiesInVietnam(
+        @Query("country") country: String,
+        @Query("format") format: String,
+        @Query("key") apiKey: String
+    ): Call<List<City>>
 }

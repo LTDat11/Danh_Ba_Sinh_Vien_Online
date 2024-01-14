@@ -3,11 +3,15 @@ package com.example.myapplication.Fragments
 
 import android.location.Geocoder
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
 import android.widget.SearchView
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import com.example.myapplication.API.ApiInterface
@@ -16,9 +20,11 @@ import com.example.myapplication.databinding.FragmentWeatherBinding
 import com.example.myapplication.models.Weather
 import retrofit2.Call
 import retrofit2.Callback
+import retrofit2.HttpException
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -45,6 +51,7 @@ class WeatherFragment : Fragment() {
     }
     private fun searchCity() {
         val searchView = binding.searchView
+
         searchView.setOnQueryTextListener(object :SearchView.OnQueryTextListener{
             override fun onQueryTextSubmit(query: String?): Boolean {
                 if (query != null) {
@@ -60,14 +67,16 @@ class WeatherFragment : Fragment() {
         })
     }
 
+
     private fun fetachWeatherData(cityName: String) {
+        binding.progressBar.visibility = View.VISIBLE
         //Gọi api openweather
         val retrofit = Retrofit.Builder()
             .addConverterFactory(GsonConverterFactory.create())
             .baseUrl("https://api.openweathermap.org/data/2.5/")
             .build().create(ApiInterface::class.java)
 
-        val response = retrofit.getWeatherData("$cityName", "60eec28a3259753f5b12b76ce3f4f461", "metric")
+        val response = retrofit.getWeatherData("$cityName, VN", "60eec28a3259753f5b12b76ce3f4f461", "metric")
         response.enqueue(object : Callback<Weather> {
             override fun onResponse(call: Call<Weather>, response: Response<Weather>) {
                 val responseBody = response.body()
@@ -98,13 +107,35 @@ class WeatherFragment : Fragment() {
                     binding.tvDay.text = dayOfWeek
                     binding.tvDate.text = formattedDate
 
-                    changeImg(condition)
 
+                    Handler(Looper.getMainLooper()).postDelayed({
+                        binding.progressBar.visibility = View.GONE
+                        binding.content.visibility = View.VISIBLE
+                        changeImg(condition)
+                    }, 1000)
+
+                }
+                else{
+                    val errorMessage = when {
+                        response.code() == 404 -> {
+                            "Tên bạn nhập không tìm thấy ở Việt Nam"
+                        }
+                        else -> "Lỗi truy xuất, vui lòng thử lại !!"
+                    }
+
+                    Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_SHORT).show()
+                    binding.progressBar.visibility = View.GONE
                 }
             }
 
             override fun onFailure(call: Call<Weather>, t: Throwable) {
-                // Handle failure if needed
+                val errorMessage = when (t) {
+                    is IOException -> "Vui lòng kiểm tra kết nối"
+                    else -> "Lỗi truy xuất, vui lòng thử lại !!"
+                }
+
+                Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_SHORT).show()
+                binding.progressBar.visibility = View.GONE
             }
         })
     }
