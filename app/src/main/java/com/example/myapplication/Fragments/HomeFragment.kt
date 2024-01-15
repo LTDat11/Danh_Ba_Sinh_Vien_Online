@@ -50,12 +50,16 @@ class HomeFragment : Fragment() {
 
     private val onItemClickListener = object : StudentAdapter.OnItemClickListener {
         override fun onItemClick(studentInfo: StudentInfo) {
-            // Xử lý khi một mục được nhấn
-            // Lấy UID từ Firestore và chuyển sang màn hình chi tiết với thông tin sinh viên
-            getUidFromFirestore(studentInfo.studentId, FirebaseAuth.getInstance().currentUser?.uid ?: "") { uid ->
-                val intent = Intent(requireContext(), InfoActivity::class.java)
-                intent.putExtra("studentUid", uid)
-                startActivityForResult(intent, INFO_ACTIVITY_REQUEST_CODE)
+            if (!isNetworkConnected()){
+                Toast.makeText(requireContext(), "Vui lòng kiểm tra kết nối mạng và thử lại", Toast.LENGTH_SHORT).show()
+            }else{
+                // Xử lý khi một mục được nhấn
+                // Lấy UID từ Firestore và chuyển sang màn hình chi tiết với thông tin sinh viên
+                getUidFromFirestore(studentInfo.studentId, FirebaseAuth.getInstance().currentUser?.uid ?: "") { uid ->
+                    val intent = Intent(requireContext(), InfoActivity::class.java)
+                    intent.putExtra("studentUid", uid)
+                    startActivityForResult(intent, INFO_ACTIVITY_REQUEST_CODE)
+                }
             }
         }
 
@@ -137,6 +141,7 @@ class HomeFragment : Fragment() {
                 this@HomeFragment.selectedStudentIds.clear()
                 updateFabVisibility()
                 setupSpinner()
+                clearSearchView()
             }
             displayStudentInfo(currentUserUid)
 
@@ -152,6 +157,13 @@ class HomeFragment : Fragment() {
 
         // Inflate the layout for this fragment
         return binding.root
+    }
+
+    private fun clearSearchView() {
+        binding.apply {
+            searchview.clearFocus()
+            searchview.setQuery("", false)
+        }
     }
 
     private fun isNetworkConnected(): Boolean {
@@ -191,98 +203,105 @@ class HomeFragment : Fragment() {
     private fun deleteStudents(selectedStudentIds: List<String>) {
         CoroutineScope(Dispatchers.IO).launch {
             withContext(Dispatchers.Main){
-                if (selectedStudentIds.isEmpty()){
-                    Toast.makeText(requireContext(), "không có nội dung được chọn để xóa (ấn giữ nội dung)", Toast.LENGTH_SHORT).show()
-                    return@withContext
-                }
-                for(studentId in selectedStudentIds){
-                    val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid
-                    getUidFromFirestore(studentId,currentUserUid ?: ""){studentUid ->
-                        val firestore = FirebaseFirestore.getInstance()
-                        if (currentUserUid != null){
-                            firestore.collection("users")
-                                .document(currentUserUid)
-                                .collection("students")
-                                .document(studentUid)
-                                .get()
-                                .addOnSuccessListener {document ->
-                                    if (document.exists()){
-                                        val studentInfo = document.toObject(StudentInfo::class.java)
-                                        if (studentInfo != null) {
-                                            // Kiểm tra ảnh để xóa
-                                            val imageUrl = studentInfo.imageUrl
-                                            // Kiểm tra có phải là avtdf hay không ?
-                                            if (imageUrl!!.contains("avtdf.jpg")){
-                                                // Nếu là avtdf, thực hiện xóa thông tin trên firestore
-                                                firestore.collection("users")
-                                                    .document(currentUserUid)
-                                                    .collection("students")
-                                                    .document(studentUid)
-                                                    .delete()
-                                                    .addOnSuccessListener {
-                                                        // Xóa thông tin thành công
-                                                        binding.progressBar.visibility = View.GONE
-                                                        Toast.makeText(requireContext(), "Xóa thông tin thành công", Toast.LENGTH_SHORT).show()
-                                                        this@HomeFragment.selectedStudentIds.clear()
-                                                        displayStudentInfo(currentUserUid)
-                                                        updateFabVisibility()
-                                                    }
-                                                    .addOnFailureListener {
-                                                        binding.progressBar.visibility = View.GONE
-                                                        Toast.makeText(requireContext(), "Xóa thông tin thất bại", Toast.LENGTH_SHORT).show()
-                                                        this@HomeFragment.selectedStudentIds.clear()
-                                                        updateFabVisibility()
-                                                    }
-                                            }else{
-                                                // Nếu không phải là avtdf, xóa ảnh tương ứng trong storage và thông tin trên firestore
-                                                val storageRef = FirebaseStorage.getInstance().getReferenceFromUrl(imageUrl.toString())
-                                                storageRef.delete()
-                                                    .addOnSuccessListener {
-                                                        //Xóa ảnh thành công, xóa tiếp thông tin trên firestore
-                                                        firestore.collection("users")
-                                                            .document(currentUserUid)
-                                                            .collection("students")
-                                                            .document(studentUid)
-                                                            .delete()
-                                                            .addOnSuccessListener {
-                                                                // Xóa thành công
-                                                                binding.progressBar.visibility = View.GONE
-                                                                Toast.makeText(requireContext(), "Xóa thông tin và ảnh thành công", Toast.LENGTH_SHORT).show()
-                                                                displayStudentInfo(currentUserUid)
-                                                                this@HomeFragment.selectedStudentIds.clear()
-                                                                updateFabVisibility()
-                                                            }
-                                                            .addOnFailureListener {
-                                                                binding.progressBar.visibility = View.GONE
-                                                                Toast.makeText(requireContext(), "Xóa thông tin thất bại", Toast.LENGTH_SHORT).show()
-                                                                this@HomeFragment.selectedStudentIds.clear()
-                                                                updateFabVisibility()
-                                                            }
-                                                    }
-                                                    .addOnFailureListener {
-                                                        binding.progressBar.visibility = View.GONE
-                                                        Toast.makeText(requireContext(), "Xóa ảnh thất bại", Toast.LENGTH_SHORT).show()
-                                                        this@HomeFragment.selectedStudentIds.clear()
-                                                        updateFabVisibility()
-                                                    }
-                                            }
+//                if (selectedStudentIds.isEmpty()){
+//                    Toast.makeText(requireContext(), "không có nội dung được chọn để xóa (ấn giữ nội dung)", Toast.LENGTH_SHORT).show()
+//                    return@withContext
+//                }
+                if (!isNetworkConnected()){
+                    Toast.makeText(requireContext(), "Vui lòng kiểm tra kết nối mạng và thử lại", Toast.LENGTH_SHORT).show()
+                }else{
+                    for(studentId in selectedStudentIds){
+                        val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid
+                        getUidFromFirestore(studentId,currentUserUid ?: ""){studentUid ->
+                            val firestore = FirebaseFirestore.getInstance()
+                            if (currentUserUid != null){
+                                firestore.collection("users")
+                                    .document(currentUserUid)
+                                    .collection("students")
+                                    .document(studentUid)
+                                    .get()
+                                    .addOnSuccessListener {document ->
+                                        if (document.exists()){
+                                            val studentInfo = document.toObject(StudentInfo::class.java)
+                                            if (studentInfo != null) {
+                                                // Kiểm tra ảnh để xóa
+                                                val imageUrl = studentInfo.imageUrl
+                                                // Kiểm tra có phải là avtdf hay không ?
+                                                if (imageUrl!!.contains("avtdf.jpg")){
+                                                    // Nếu là avtdf, thực hiện xóa thông tin trên firestore
+                                                    firestore.collection("users")
+                                                        .document(currentUserUid)
+                                                        .collection("students")
+                                                        .document(studentUid)
+                                                        .delete()
+                                                        .addOnSuccessListener {
+                                                            // Xóa thông tin thành công
+                                                            binding.progressBar.visibility = View.GONE
+                                                            Toast.makeText(requireContext(), "Xóa thông tin thành công", Toast.LENGTH_SHORT).show()
+                                                            this@HomeFragment.selectedStudentIds.clear()
+                                                            displayStudentInfo(currentUserUid)
+                                                            updateFabVisibility()
+                                                            clearSearchView()
+                                                        }
+                                                        .addOnFailureListener {
+                                                            binding.progressBar.visibility = View.GONE
+                                                            Toast.makeText(requireContext(), "Xóa thông tin thất bại", Toast.LENGTH_SHORT).show()
+                                                            this@HomeFragment.selectedStudentIds.clear()
+                                                            updateFabVisibility()
+                                                        }
+                                                }else{
+                                                    // Nếu không phải là avtdf, xóa ảnh tương ứng trong storage và thông tin trên firestore
+                                                    val storageRef = FirebaseStorage.getInstance().getReferenceFromUrl(imageUrl.toString())
+                                                    storageRef.delete()
+                                                        .addOnSuccessListener {
+                                                            //Xóa ảnh thành công, xóa tiếp thông tin trên firestore
+                                                            firestore.collection("users")
+                                                                .document(currentUserUid)
+                                                                .collection("students")
+                                                                .document(studentUid)
+                                                                .delete()
+                                                                .addOnSuccessListener {
+                                                                    // Xóa thành công
+                                                                    binding.progressBar.visibility = View.GONE
+                                                                    Toast.makeText(requireContext(), "Xóa thông tin và ảnh thành công", Toast.LENGTH_SHORT).show()
+                                                                    displayStudentInfo(currentUserUid)
+                                                                    this@HomeFragment.selectedStudentIds.clear()
+                                                                    updateFabVisibility()
+                                                                    clearSearchView()
+                                                                }
+                                                                .addOnFailureListener {
+                                                                    binding.progressBar.visibility = View.GONE
+                                                                    Toast.makeText(requireContext(), "Xóa thông tin thất bại", Toast.LENGTH_SHORT).show()
+                                                                    this@HomeFragment.selectedStudentIds.clear()
+                                                                    updateFabVisibility()
+                                                                }
+                                                        }
+                                                        .addOnFailureListener {
+                                                            binding.progressBar.visibility = View.GONE
+                                                            Toast.makeText(requireContext(), "Xóa ảnh thất bại", Toast.LENGTH_SHORT).show()
+                                                            this@HomeFragment.selectedStudentIds.clear()
+                                                            updateFabVisibility()
+                                                        }
+                                                }
 
-                                        }else{
-                                            binding.progressBar.visibility = View.GONE
-                                            Toast.makeText(requireContext(), "Lỗi Không có thông tin", Toast.LENGTH_SHORT).show()
-                                            this@HomeFragment.selectedStudentIds.clear()
-                                            updateFabVisibility()
+                                            }else{
+                                                binding.progressBar.visibility = View.GONE
+                                                Toast.makeText(requireContext(), "Lỗi Không có thông tin", Toast.LENGTH_SHORT).show()
+                                                this@HomeFragment.selectedStudentIds.clear()
+                                                updateFabVisibility()
+                                            }
                                         }
+                                    }.addOnFailureListener { exception ->
+                                        binding.progressBar.visibility = View.GONE
+                                        Toast.makeText(requireContext(), "Lỗi khi lấy thông tin sinh viên", Toast.LENGTH_SHORT).show()
+                                        this@HomeFragment.selectedStudentIds.clear()
+                                        updateFabVisibility()
                                     }
-                                }.addOnFailureListener { exception ->
-                                    binding.progressBar.visibility = View.GONE
-                                    Toast.makeText(requireContext(), "Lỗi khi lấy thông tin sinh viên", Toast.LENGTH_SHORT).show()
-                                    this@HomeFragment.selectedStudentIds.clear()
-                                    updateFabVisibility()
-                                }
+                            }
                         }
                     }
                 }
+
             }
         }
     }
