@@ -1,18 +1,25 @@
 package com.example.myapplication.Fragments
 
 
+import android.content.Context
+import android.graphics.Rect
 import android.location.Geocoder
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.view.KeyEvent
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import android.widget.ArrayAdapter
+import android.widget.AutoCompleteTextView
 import android.widget.SearchView
 import android.widget.Toast
+import androidx.activity.addCallback
 import androidx.core.content.ContextCompat
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.graphics.drawable.DrawableCompat
 import com.example.myapplication.API.ApiInterface
 import com.example.myapplication.R
@@ -49,24 +56,31 @@ class WeatherFragment : Fragment() {
 
         return view
     }
+
     private fun searchCity() {
-        val searchView = binding.searchView
-
-        searchView.setOnQueryTextListener(object :SearchView.OnQueryTextListener{
-            override fun onQueryTextSubmit(query: String?): Boolean {
-                if (query != null) {
-                    fetachWeatherData(query)
-                }
-                return true
+        val list = resources.getStringArray(R.array.Province)
+        val adt = ArrayAdapter(requireContext(),android.R.layout.simple_list_item_1,list)
+        binding.searchView.setAdapter(adt)
+        // Sự kiện khi chọn một item từ AutoCompleteTextView
+        binding.searchView.setOnItemClickListener { parent, view, position, id ->
+            val selectedProvince = parent.getItemAtPosition(position).toString()
+            fetachWeatherData(selectedProvince)
+            binding.searchView.setText("")
+            binding.searchView.clearFocus()
+        }
+        // Sự kiện khi nhấn Enter trên bàn phím
+        binding.searchView.setOnKeyListener { v, keyCode, event ->
+            if (event.action == KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_ENTER) {
+                val enteredText = (v as AutoCompleteTextView).text.toString()
+                fetachWeatherData(enteredText)
+                binding.searchView.setText("")
+                binding.searchView.clearFocus()
+                return@setOnKeyListener true
             }
-
-            override fun onQueryTextChange(newText: String?): Boolean {
-                return true
-            }
-
-        })
+            false
+        }
+        binding.searchView.setOnFocusChangeListener { v, hasFocus -> if(hasFocus) binding.searchView.showDropDown()}
     }
-
 
     private fun fetachWeatherData(cityName: String) {
         binding.progressBar.visibility = View.VISIBLE
