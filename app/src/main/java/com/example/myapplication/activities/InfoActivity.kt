@@ -3,8 +3,10 @@ package com.example.myapplication.activities
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.DatePickerDialog
+import android.app.Dialog
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Paint
 import android.net.ConnectivityManager
@@ -16,14 +18,21 @@ import android.provider.MediaStore
 import android.text.InputType
 import android.view.View
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import com.bumptech.glide.Glide
+import com.example.myapplication.R
 import com.example.myapplication.databinding.ActivityInfoBinding
 import com.example.myapplication.models.StudentInfo
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
+import com.google.zxing.BarcodeFormat
+import com.google.zxing.WriterException
+import com.google.zxing.common.BitMatrix
+import com.google.zxing.qrcode.QRCodeWriter
+import com.google.zxing.qrcode.encoder.QRCode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -184,8 +193,65 @@ class InfoActivity : AppCompatActivity() {
                 shareStudentInfo()
             }
 
+            generateQrCodeButton.setOnClickListener {
+                showQRCodeDialog()
+            }
+
         }
 
+    }
+
+    private fun showQRCodeDialog() {
+        CoroutineScope(Dispatchers.IO).launch {
+            withContext(Dispatchers.Main){
+                val dialog = Dialog(this@InfoActivity)
+                dialog.setContentView(R.layout.dialog_qr_code)
+                dialog.setTitle("QR Code")
+                binding.apply {
+                    val edt_name_input = edtNameInput.text.toString().trim()
+                    val tv_date_now = tvDateNow.text.toString().trim()
+                    val edt_phone_number_input = edtPhoneNumberInput.text.toString().trim()
+                    val edt_email_input = edtEmailInput.text.toString().trim()
+                    val edt_major_input = edtMajorInput.text.toString().trim()
+                    val edt_id_student_input = edtIdStudentInput.text.toString().trim()
+                    val edt_id_class_input = edtIdClassInput.text.toString().trim()
+                    val edt_id_course_input = edtIdCourseInput.text.toString().trim()
+
+                    val data = "$edt_name_input\n$tv_date_now\n$edt_phone_number_input\n$edt_email_input\n$edt_major_input\n$edt_id_student_input\n$edt_id_class_input\n$edt_id_course_input"
+
+                    try {
+                        val bitmap = generateQRCodeBitmap(data)
+                        withContext(Dispatchers.Main) {
+                            val imageView = dialog.findViewById<ImageView>(R.id.qrCodeImageViewDialog)
+                            imageView.setImageBitmap(bitmap)
+                            dialog.show()
+                        }
+                    } catch (e: WriterException) {
+                        e.printStackTrace()
+                    }
+                }
+            }
+        }
+    }
+
+    private fun generateQRCodeBitmap(data: String): Bitmap {
+        val writer = QRCodeWriter()
+        try {
+            val bitMatrix: BitMatrix = writer.encode(data, BarcodeFormat.QR_CODE, 512, 512)
+            val width = bitMatrix.width
+            val height = bitMatrix.height
+            val bmp = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565)
+
+            for (x in 0 until width) {
+                for (y in 0 until height) {
+                    bmp.setPixel(x, y, if (bitMatrix[x, y]) android.graphics.Color.BLACK else android.graphics.Color.WHITE)
+                }
+            }
+
+            return bmp
+        } catch (e: WriterException) {
+            throw e
+        }
     }
 
     private fun shareStudentInfo() {

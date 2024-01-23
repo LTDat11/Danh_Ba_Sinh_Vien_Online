@@ -44,6 +44,7 @@ class MainPageFragment : Fragment() {
                 when (item.itemId) {
                     R.id.navigation_home -> replaceFragment(HomeFragment())
 //                    R.id.navigation_add -> replaceFragment(AddFragment())
+                    R.id.navigation_scan -> replaceFragment(ScanQRCodeFragment())
                     R.id.navigation_weather -> replaceFragment(WeatherFragment())
                     R.id.navigation_setting -> replaceFragment(SettingFragment())
                 }

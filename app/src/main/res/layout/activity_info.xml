@@ -364,12 +364,26 @@
         android:layout_height="wrap_content"
         android:text="Chia sẻ"
         app:layout_constraintStart_toEndOf="@+id/btn_delete_info"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/generateQrCodeButton"
         app:layout_constraintTop_toBottomOf="@+id/edt_id_course_input"
         app:layout_constraintBottom_toBottomOf="parent"
         android:layout_marginTop="15dp"
         android:textSize="20dp"
         android:backgroundTint="@color/black"/>
+
+
+    <ImageButton
+        android:id="@+id/generateQrCodeButton"
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:src="@drawable/baseline_qr_code_scanner_24"
+        app:layout_constraintBottom_toBottomOf="@+id/btn_share_info"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toEndOf="@+id/btn_share_info"
+        app:layout_constraintTop_toTopOf="@+id/btn_share_info"
+        android:visibility="visible"
+        app:layout_constraintVertical_bias="0.878" />
 
     <ProgressBar
         android:id="@+id/progress_bar"

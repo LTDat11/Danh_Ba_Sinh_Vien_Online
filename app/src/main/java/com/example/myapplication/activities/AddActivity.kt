@@ -42,8 +42,30 @@ class AddActivity : AppCompatActivity() {
         val year = currentDate.get(Calendar.YEAR)
         val month = currentDate.get(Calendar.MONTH)
         val day = currentDate.get(Calendar.DAY_OF_MONTH)
+
+        val scannedData = intent.getStringExtra("scannedData")
+
+        if (scannedData != null){
+
+            binding.apply {
+                val dataArray = scannedData.split("\n")
+                edtNameInput.setText(dataArray[0])
+                tvDateNow.setText(dataArray[1])
+                edtPhoneNumberInput.setText(dataArray[2])
+                edtEmailInput.setText(dataArray[3])
+                edtMajorInput.setText(dataArray[4])
+                edtIdStudentInput.setText(dataArray[5])
+                edtIdClassInput.setText(dataArray[6])
+                edtIdCourseInput.setText(dataArray[7])
+            }
+        }else{
+            binding.tvDateNow.text = "$day/${month + 1}/$year"
+        }
+
+
+
         binding.apply {
-            tvDateNow.text = "$day/${month + 1}/$year"
+
             //Chọn ngày tháng nămm
             btnDate.setOnClickListener {
 
