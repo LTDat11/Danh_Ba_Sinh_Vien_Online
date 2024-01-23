@@ -1,6 +1,7 @@
 package com.example.myapplication.Fragments
 
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import android.net.ConnectivityManager
 import android.os.Bundle
@@ -15,6 +16,8 @@ import androidx.activity.addCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.FragmentTransaction
 import com.example.myapplication.R
+import com.example.myapplication.activities.AddActivity
+import com.example.myapplication.activities.ChangePassActivity
 import com.example.myapplication.databinding.FragmentMainPageBinding
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.CoroutineScope
@@ -40,11 +43,16 @@ class MainPageFragment : Fragment() {
             bottomNavigationView.setOnNavigationItemSelectedListener { item ->
                 when (item.itemId) {
                     R.id.navigation_home -> replaceFragment(HomeFragment())
-                    R.id.navigation_add -> replaceFragment(AddFragment())
+//                    R.id.navigation_add -> replaceFragment(AddFragment())
                     R.id.navigation_weather -> replaceFragment(WeatherFragment())
                     R.id.navigation_setting -> replaceFragment(SettingFragment())
                 }
                 true
+            }
+
+            floating.setOnClickListener{
+                val intent = Intent (requireContext(), AddActivity::class.java)
+                startActivity(intent)
             }
 
             // Kiểm tra kết nối mạng định kỳ
@@ -77,6 +85,7 @@ class MainPageFragment : Fragment() {
         CoroutineScope(Dispatchers.IO).launch {
             withContext(Dispatchers.Main) {
                 Snackbar.make(binding.root, s, Snackbar.LENGTH_INDEFINITE)
+                    .setAnchorView(binding.bottomNavigationView)
                     .setAction("Thử lại") {
                         if (isNetworkAvailable()) {
                             // Nếu có kết nối, thực hiện các hành động cần thiết

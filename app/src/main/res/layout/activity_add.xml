@@ -1,0 +1,312 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activities.AddActivity">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/img_selected"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                android:src="@drawable/avtdefault"
+                android:layout_marginTop="10dp"
+                android:layout_marginStart="10dp"/>
+
+            <Button
+                android:id="@+id/btn_select_img"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Chọn ảnh"
+                android:backgroundTint="@color/black"
+                android:textSize="20dp"
+                app:layout_constraintStart_toEndOf="@+id/img_selected"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginTop="25dp" />
+            <Button
+                android:id="@+id/btn_delete_img"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Xóa ảnh"
+                android:backgroundTint="@color/black"
+                android:textSize="20dp"
+                app:layout_constraintStart_toEndOf="@+id/img_selected"
+                app:layout_constraintTop_toBottomOf="@id/btn_select_img"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginTop="15dp" />
+
+            <ImageButton
+                android:id="@+id/btn_reset_form"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/baseline_refresh_24"
+                app:layout_constraintTop_toBottomOf="@+id/btn_delete_img"
+                app:layout_constraintBottom_toTopOf="@id/edt_name_input"
+                app:layout_constraintStart_toEndOf="@id/btn_delete_img"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:background="@color/white"
+                android:layout_marginBottom="20dp"/>
+
+            <TextView
+                android:id="@+id/tv_Name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Họ và tên: "
+                android:textSize="25dp"
+                android:textStyle="bold"
+                android:layout_marginTop="10dp"
+                app:layout_constraintTop_toBottomOf="@id/img_selected"
+                android:layout_marginStart="10dp"
+                app:layout_constraintStart_toStartOf="parent"/>
+
+            <EditText
+                android:id="@+id/edt_name_input"
+                android:layout_height="wrap_content"
+                android:layout_width="250dp"
+                android:layout_marginStart="10dp"
+                android:hint="họ và tên"
+                android:textSize="25dp"
+                android:inputType="textCapWords"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/tv_Name"
+                app:layout_constraintTop_toBottomOf="@id/img_selected"
+                android:maxLines="1"/>
+
+            <TextView
+                android:id="@+id/tv_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Ngày sinh: "
+                android:textSize="25dp"
+                android:textStyle="bold"
+                android:layout_marginTop="20dp"
+                app:layout_constraintTop_toBottomOf="@id/tv_Name"
+                android:layout_marginStart="10dp"
+                app:layout_constraintStart_toStartOf="parent"/>
+
+            <TextView
+                android:id="@+id/tv_date_now"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="07/12/2023"
+                android:textSize="25dp"
+                android:textStyle=""
+                android:layout_marginTop="10dp"
+                app:layout_constraintTop_toBottomOf="@id/edt_name_input"
+                android:layout_marginStart="20dp"
+                app:layout_constraintStart_toEndOf="@+id/tv_date"/>
+
+            <ImageButton
+                android:id="@+id/btn_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toBottomOf="@+id/edt_name_input"
+                app:layout_constraintStart_toEndOf="@id/tv_date_now"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginTop="15dp"
+                android:src="@drawable/baseline_date_range_24"
+                android:background="@color/white"/>
+
+
+            <TextView
+                android:id="@+id/tv_phone_number"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Số điện thoại: "
+                android:textSize="25dp"
+                android:textStyle="bold"
+                android:layout_marginTop="20dp"
+                app:layout_constraintTop_toBottomOf="@id/tv_date"
+                android:layout_marginStart="10dp"
+                app:layout_constraintStart_toStartOf="parent"/>
+
+            <EditText
+                android:id="@+id/edt_phone_number_input"
+                android:layout_height="wrap_content"
+                android:layout_width="220dp"
+                android:layout_marginStart="5dp"
+                android:layout_marginTop="10dp"
+                android:hint="số điện thoại"
+                android:textSize="25dp"
+                android:inputType="phone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/tv_phone_number"
+                app:layout_constraintTop_toBottomOf="@id/tv_date_now"
+                android:maxLines="1"/>
+
+            <TextView
+                android:id="@+id/tv_email_adr"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Email: "
+                android:textSize="25dp"
+                android:textStyle="bold"
+                android:layout_marginTop="30dp"
+                app:layout_constraintTop_toBottomOf="@id/tv_phone_number"
+                android:layout_marginStart="10dp"
+                app:layout_constraintStart_toStartOf="parent"/>
+
+            <EditText
+                android:id="@+id/edt_email_input"
+                android:layout_height="wrap_content"
+                android:layout_width="290dp"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="10dp"
+                android:hint="địa chỉ email"
+                android:textSize="25dp"
+                android:inputType="textEmailAddress"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/tv_email_adr"
+                app:layout_constraintTop_toBottomOf="@id/edt_phone_number_input"
+                android:maxLines="1"/>
+
+            <TextView
+                android:id="@+id/tv_major"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Ngành: "
+                android:textSize="25dp"
+                android:textStyle="bold"
+                android:layout_marginTop="30dp"
+                app:layout_constraintTop_toBottomOf="@id/tv_email_adr"
+                android:layout_marginStart="10dp"
+                app:layout_constraintStart_toStartOf="parent"/>
+
+            <EditText
+                android:id="@+id/edt_major_input"
+                android:layout_height="wrap_content"
+                android:layout_width="290dp"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="10dp"
+                android:hint="ngành học"
+                android:textSize="25dp"
+                android:inputType="textCapWords"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/tv_major"
+                app:layout_constraintTop_toBottomOf="@id/edt_email_input"
+                android:maxLines="1"/>
+
+            <TextView
+                android:id="@+id/tv_id_student"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Mã số: "
+                android:textSize="25dp"
+                android:textStyle="bold"
+                android:layout_marginTop="30dp"
+                app:layout_constraintTop_toBottomOf="@id/tv_major"
+                android:layout_marginStart="10dp"
+                app:layout_constraintStart_toStartOf="parent"/>
+
+            <EditText
+                android:id="@+id/edt_id_student_input"
+                android:layout_height="wrap_content"
+                android:layout_width="290dp"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="10dp"
+                android:hint="mã số sinh viên"
+                android:textSize="25dp"
+                android:inputType="textCapCharacters"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/tv_id_student"
+                app:layout_constraintTop_toBottomOf="@id/edt_major_input"
+                android:maxLines="1"/>
+
+            <TextView
+                android:id="@+id/tv_id_class"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Mã lớp: "
+                android:textSize="25dp"
+                android:textStyle="bold"
+                android:layout_marginTop="30dp"
+                app:layout_constraintTop_toBottomOf="@id/tv_id_student"
+                android:layout_marginStart="10dp"
+                app:layout_constraintStart_toStartOf="parent"/>
+
+            <EditText
+                android:id="@+id/edt_id_class_input"
+                android:layout_height="wrap_content"
+                android:layout_width="290dp"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="10dp"
+                android:hint="mã số lớp"
+                android:textSize="25dp"
+                android:inputType="textCapCharacters"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/tv_id_class"
+                app:layout_constraintTop_toBottomOf="@id/edt_id_student_input"
+                android:maxLines="1"/>
+
+            <TextView
+                android:id="@+id/tv_id_course"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Khóa: "
+                android:textSize="25dp"
+                android:textStyle="bold"
+                android:layout_marginTop="30dp"
+                app:layout_constraintTop_toBottomOf="@id/tv_id_class"
+                android:layout_marginStart="10dp"
+                app:layout_constraintStart_toStartOf="parent"/>
+
+            <EditText
+                android:id="@+id/edt_id_course_input"
+                android:layout_height="wrap_content"
+                android:layout_width="290dp"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="10dp"
+                android:hint="Khóa đang học"
+                android:textSize="25dp"
+                android:inputType="textCapCharacters"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/tv_id_course"
+                app:layout_constraintTop_toBottomOf="@id/edt_id_class_input"
+                android:maxLines="1"/>
+
+            <Button
+                android:id="@+id/btn_save_info"
+                android:layout_width="250dp"
+                android:layout_height="wrap_content"
+                android:text="Lưu"
+                android:textSize="30dp"
+                android:backgroundTint="@color/black"
+                app:layout_constraintTop_toBottomOf="@id/edt_id_course_input"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:layout_marginStart="25dp"
+                android:layout_marginEnd="25dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="15dp"/>
+
+            <ProgressBar
+                android:id="@+id/progress_bar"
+                android:visibility="gone"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent" />
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </ScrollView>
+
+</RelativeLayout>
