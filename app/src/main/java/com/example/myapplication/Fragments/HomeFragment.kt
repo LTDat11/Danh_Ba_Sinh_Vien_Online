@@ -9,6 +9,8 @@ import android.net.NetworkCapabilities
 import android.net.NetworkInfo
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -79,7 +81,7 @@ class HomeFragment : Fragment() {
     }
 
     private fun updateFabVisibility() {
-        binding.fab.visibility = if (selectedStudentIds.isNotEmpty()) View.VISIBLE else View.GONE
+        binding.fab.visibility = if (selectedStudentIds.isEmpty()) View.GONE else View.VISIBLE
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -137,11 +139,11 @@ class HomeFragment : Fragment() {
             swipeRefreshLayout = swipeRefresh
             swipeRefreshLayout.setOnRefreshListener {
                 // Làm mới dữ liệu (kéo từ trên xuống)
-                displayStudentInfo(currentUserUid)
                 this@HomeFragment.selectedStudentIds.clear()
                 updateFabVisibility()
                 setupSpinner()
                 clearSearchView()
+                displayStudentInfo(currentUserUid)
             }
             displayStudentInfo(currentUserUid)
 
@@ -426,6 +428,14 @@ class HomeFragment : Fragment() {
                             swipeRefreshLayout.isRefreshing = false
                         }
                 }
+
+                Handler(Looper.getMainLooper()).postDelayed({
+                    binding.apply {
+                        recycleview.visibility = View.VISIBLE
+                        linearlayout.visibility = View.VISIBLE
+                        progressBar.visibility = View.GONE
+                    }
+                }, 1200)
             }
         }
     }

@@ -23,6 +23,8 @@ import com.bumptech.glide.Glide
 import com.example.myapplication.R
 import com.example.myapplication.activities.ChangePassActivity
 import com.example.myapplication.databinding.FragmentSettingBinding
+import com.google.android.gms.tasks.Task
+import com.google.android.gms.tasks.Tasks
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
@@ -161,27 +163,37 @@ class SettingFragment : Fragment() {
     private fun deleteAllStudentDocuments() {
         val userUid = FirebaseAuth.getInstance().currentUser?.uid
         // Đường dẫn đến thư mục /profile_images/userUid
-        val storageRef = storage.reference.child("profile_images").child(userUid!!)
+        val storageRef = FirebaseStorage.getInstance().reference.child("profile_images/$userUid")
 
         val studentCollectionRef = firestore.collection("users").document(userUid!!).collection("students")
 
         storageRef.listAll()
             .addOnSuccessListener { result ->
                 // Xóa tất cả các item trong thư mục
+                val deleteTasks = mutableListOf<Task<Void>>()
                 for (item in result.items) {
-                    item.delete()
+                    deleteTasks.add(item.delete())
                 }
 
-                // Xóa thư mục
-                storageRef.delete()
+                Tasks.whenAllComplete(deleteTasks)
                     .addOnSuccessListener {
-                        return@addOnSuccessListener
+                        // Xóa thư mục sau khi tất cả các item đã được xóa
+                        storageRef.delete()
+                            .addOnSuccessListener {
+                                return@addOnSuccessListener
+                            }
+                            .addOnFailureListener { exception ->
+                                Log.e("FirebaseStorage", "Lỗi khi xóa thư mục: $exception")
+                                return@addOnFailureListener
+                            }
                     }
                     .addOnFailureListener { exception ->
+                        Log.e("FirebaseStorage", "Lỗi khi xóa item: $exception")
                         return@addOnFailureListener
                     }
             }
             .addOnFailureListener { exception ->
+                Log.e("FirebaseStorage", "Lỗi khi liệt kê item: $exception")
                 return@addOnFailureListener
             }
 
@@ -192,24 +204,32 @@ class SettingFragment : Fragment() {
                     Toast.makeText(requireContext(), "Không có nội dung để xóa", Toast.LENGTH_SHORT).show()
                 } else {
                     // Xóa tất cả documents trong collection
+                    val deleteDocumentTasks = mutableListOf<Task<Void>>()
                     for (document in documents) {
-                        document.reference.delete()
+                        deleteDocumentTasks.add(document.reference.delete())
                     }
 
-                    // Sau khi xóa tất cả documents, bạn có thể xóa cả collection nếu cần
-                    firestore.collection("students").document().delete()
+                    Tasks.whenAllComplete(deleteDocumentTasks)
                         .addOnSuccessListener {
-                            Toast.makeText(requireContext(), "Xóa thành công", Toast.LENGTH_SHORT).show()
+                            // Xóa collection sau khi tất cả các documents đã được xóa
+                            firestore.collection("users").document(userUid).collection("students").document().delete()
+                                .addOnSuccessListener {
+                                    Toast.makeText(requireContext(), "Xóa thành công", Toast.LENGTH_SHORT).show()
+                                }
+                                .addOnFailureListener { exception ->
+                                    Toast.makeText(requireContext(), "Lỗi, xóa thất bại !!", Toast.LENGTH_SHORT).show()
+                                }
                         }
                         .addOnFailureListener { exception ->
-                            Toast.makeText(requireContext(), "Lỗi, xóa thất bại !!", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(requireContext(), "Lỗi khi xóa documents: $exception", Toast.LENGTH_SHORT).show()
                         }
                 }
             }
             .addOnFailureListener { exception ->
-                Toast.makeText(requireContext(), "Lỗi, không thể kiểm tra collection: $exception", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Lỗi khi kiểm tra collection: $exception", Toast.LENGTH_SHORT).show()
             }
     }
+
 
 
     private fun isNetworkConnected(): Boolean {

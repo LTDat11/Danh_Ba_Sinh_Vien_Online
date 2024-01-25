@@ -85,7 +85,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="15dp"
-                    android:hint="Nhập laị mật khẩu mới"
+                    android:hint="Nhập lại mật khẩu mới"
                     app:layout_constraintTop_toBottomOf="@+id/layout_new_pass_input"
                     app:layout_constraintStart_toStartOf="parent"
                     app:endIconMode="password_toggle"

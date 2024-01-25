@@ -132,7 +132,7 @@ class ChangePassActivity : AppCompatActivity() {
                                 showMessage("Mật khẩu mới và xác nhận mật khẩu không khớp.")
                             }
                         } else {
-                            showMessage("Mật khẩu cũ không đúng.")
+                            showMessage("Mật khẩu hiện tại không đúng.")
                             progressBar.visibility = View.GONE
                         }
                     }

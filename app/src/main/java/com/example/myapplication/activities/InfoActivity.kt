@@ -217,7 +217,7 @@ class InfoActivity : AppCompatActivity() {
                     val edt_id_class_input = edtIdClassInput.text.toString().trim()
                     val edt_id_course_input = edtIdCourseInput.text.toString().trim()
 
-                    val data = "$edt_name_input\n$tv_date_now\n$edt_phone_number_input\n$edt_email_input\n$edt_major_input\n$edt_id_student_input\n$edt_id_class_input\n$edt_id_course_input"
+                    val data = "$edt_name_input\n$tv_date_now\n$edt_phone_number_input\n$edt_email_input\n$edt_major_input\n$edt_id_student_input\n$edt_id_class_input\n$edt_id_course_input\nCheckQR"
 
                     try {
                         val bitmap = generateQRCodeBitmap(data)
@@ -396,6 +396,7 @@ class InfoActivity : AppCompatActivity() {
         val editText = EditText(this@InfoActivity)
         editText.hint = "Nhập mã của khóa mới"
         editText.inputType = InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS
+        editText.setText("${binding.edtIdCourseInput.text}")
 
         AlertDialog.Builder(this@InfoActivity)
             .setTitle("Chỉnh sửa mã khóa")
@@ -443,6 +444,7 @@ class InfoActivity : AppCompatActivity() {
         val editText = EditText(this@InfoActivity)
         editText.hint = "Nhập mã lớp mới"
         editText.inputType = InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS
+        editText.setText("${binding.edtIdClassInput.text}")
 
         AlertDialog.Builder(this@InfoActivity)
             .setTitle("Chỉnh sửa mã lớp")
@@ -491,6 +493,7 @@ class InfoActivity : AppCompatActivity() {
         val editText = EditText(this@InfoActivity)
         editText.hint = "Nhập mã số sinh viên mới"
         editText.inputType = InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS
+        editText.setText("${binding.edtIdStudentInput.text}")
 
         AlertDialog.Builder(this@InfoActivity)
             .setTitle("Chỉnh sửa mã số sinh viên")
@@ -565,6 +568,7 @@ class InfoActivity : AppCompatActivity() {
         val editText = EditText(this@InfoActivity)
         editText.hint = "Nhập ngành mới"
         editText.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_CAP_WORDS
+        editText.setText("${binding.edtMajorInput.text}")
 
         AlertDialog.Builder(this@InfoActivity)
             .setTitle("Chỉnh sửa ngành")
@@ -612,6 +616,7 @@ class InfoActivity : AppCompatActivity() {
         val editText = EditText(this@InfoActivity)
         editText.hint = "Nhập email mới"
         editText.inputType = InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
+        editText.setText("${binding.edtEmailInput.text}")
 
         AlertDialog.Builder(this@InfoActivity)
             .setTitle("Chỉnh sửa email")
@@ -701,6 +706,7 @@ class InfoActivity : AppCompatActivity() {
         val editText = EditText(this@InfoActivity)
         editText.hint = "Nhập số điện thoại mới"
         editText.inputType = InputType.TYPE_CLASS_PHONE
+        editText.setText("${binding.edtPhoneNumberInput.text}")
 
         AlertDialog.Builder(this@InfoActivity)
             .setTitle("Chỉnh sửa số điện thoại")
@@ -814,6 +820,7 @@ class InfoActivity : AppCompatActivity() {
         val editText = EditText(this@InfoActivity)
         editText.hint = "Nhập tên mới"
         editText.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_CAP_WORDS
+        editText.setText("${binding.edtNameInput.text}")
 
         AlertDialog.Builder(this@InfoActivity)
             .setTitle("Chỉnh sửa tên")
