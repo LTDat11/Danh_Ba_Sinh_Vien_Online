@@ -268,20 +268,27 @@ class SettingFragment : Fragment() {
                         // Xóa ảnh hiện tại trong Firebase Storage
                         currentImageRef.delete()
                             .addOnSuccessListener {
-                                // Thành công, cập nhật đường dẫn ảnh mới vào Firestore
-                                val newImageUrl =
-                                    "https://firebasestorage.googleapis.com/v0/b/tuhoc-86488.appspot.com/o/profile_images%2Favtdf.jpg?alt=media&token=18fd7912-2a5e-4dea-a851-76b829266fad"
-                                userDocument.update("profileImageUrl", newImageUrl)
-                                    .addOnSuccessListener {
-                                        // Thông báo cập nhật thành công
-                                        Toast.makeText(context, "Xóa và cập nhật ảnh thành công!", Toast.LENGTH_SHORT).show()
-                                        // Hiển thị ảnh mới lên giao diện
-                                        loadUserInfo()
-                                    }
-                                    .addOnFailureListener {
-                                        // Thông báo cập nhật thất bại
-                                        Toast.makeText(context, "Cập nhật ảnh thất bại!", Toast.LENGTH_SHORT).show()
-                                    }
+                                // Thành công, cập nhật đường dẫn ảnh avtdf vào Firestore
+                                val imageStorageRef = FirebaseStorage.getInstance().reference.child("profile_images")
+                                val imageRef = imageStorageRef.child("avtdf.jpg")
+                                // Lấy URL của ảnh từ Firebase Storage
+                                imageRef.downloadUrl.addOnSuccessListener {imageUrl ->
+                                    //"https://firebasestorage.googleapis.com/v0/b/tuhoc-86488.appspot.com/o/profile_images%2Favtdf.jpg?alt=media&token=18fd7912-2a5e-4dea-a851-76b829266fad"
+                                    val newImageUrl = imageUrl.toString()
+
+                                    userDocument.update("profileImageUrl", newImageUrl)
+                                        .addOnSuccessListener {
+                                            // Thông báo cập nhật thành công
+                                            Toast.makeText(context, "Xóa và cập nhật ảnh thành công!", Toast.LENGTH_SHORT).show()
+                                            // Hiển thị ảnh mới lên giao diện
+                                            loadUserInfo()
+                                        }
+                                        .addOnFailureListener {
+                                            // Thông báo cập nhật thất bại
+                                            Toast.makeText(context, "Cập nhật ảnh thất bại!", Toast.LENGTH_SHORT).show()
+                                        }
+                                }
+
                             }
                             .addOnFailureListener {
                                 // Thông báo xóa ảnh hiện tại thất bại
