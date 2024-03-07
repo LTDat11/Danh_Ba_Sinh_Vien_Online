@@ -30,31 +30,20 @@ class ForgotPassFragment : Fragment() {
             btnForgotPass.setOnClickListener {
                 if (!isNetworkConnected()){
                     Toast.makeText(requireContext(), "Vui lòng kiểm tra kết nối mạng và thử lại", Toast.LENGTH_SHORT).show()
-                }else{
-                    val email = forgotPassInput.text.toString()
+                } else {
+                    val email = forgotPassInput.text.toString().trim()
                     progressBar.visibility = View.VISIBLE
 
                     if (validateEmail(email)) {
-                        // Kiểm tra xem email có tồn tại trong hệ thống hay không
-                        auth.fetchSignInMethodsForEmail(email)
-                            .addOnCompleteListener { task ->
-                                if (task.isSuccessful) {
-                                    val signInMethods = task.result?.signInMethods
-                                    if (signInMethods != null && signInMethods.isNotEmpty()) {
-                                        // Email đã được đăng ký, gửi yêu cầu đặt lại mật khẩu
-                                        auth.sendPasswordResetEmail(email)
-                                            .addOnCompleteListener { resetTask ->
-                                                if (resetTask.isSuccessful) {
-                                                    showMessage("Đã gửi yêu cầu đặt lại mật khẩu. Vui lòng kiểm tra email của bạn.")
-                                                } else {
-                                                    showMessage2("Lỗi: ${resetTask.exception?.message}")
-                                                }
-                                            }
-                                    } else {
-                                        showMessage2("Email chưa từng được đăng ký.")
-                                    }
+                        auth.sendPasswordResetEmail(email)
+                            .addOnCompleteListener(requireActivity()) { resetTask ->
+                                progressBar.visibility = View.GONE
+                                if (resetTask.isSuccessful) {
+                                    // Gửi yêu cầu đặt lại mật khẩu thành công
+                                    showMessage("Đã gửi yêu cầu đặt lại mật khẩu. Vui lòng kiểm tra email của bạn.")
                                 } else {
-                                    showMessage2("Lỗi: ${task.exception?.message}")
+                                    // Xảy ra lỗi khi gửi yêu cầu đặt lại mật khẩu
+                                    showMessage2("Lỗi: ${resetTask.exception?.message}")
                                 }
                             }
                     }

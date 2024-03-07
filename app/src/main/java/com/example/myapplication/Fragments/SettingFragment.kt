@@ -390,7 +390,9 @@ class SettingFragment : Fragment() {
                     // Nếu chấp nhận, tiếp tục tải ảnh lên Firebase Storage
                     uploadImage(imageRef)
                 }
-                .setNegativeButton("Hủy bỏ", null)
+                .setNegativeButton("Hủy bỏ"){_,_ ->
+                    loadUserInfo()
+                }
                 .create()
 
             // Hiển thị AlertDialog
